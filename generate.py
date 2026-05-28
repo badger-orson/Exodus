@@ -1,57 +1,31 @@
 #!/usr/bin/env python3
-"""Exodus Blog - 8 full articles per day generator"""
+"""Exodus Blog - Full essays + strong dark visual theme"""
 
 import datetime
 import os
 
 ARTICLES = [
     {
-        "slug": "civilization-collapse-reality-vs-fiction",
-        "title": "Civilization Collapse: Reality vs Fiction",
-        "excerpt": "Most stories get the dramatic fall right. Few get what happens in the months and years after.",
-        "content": "The moment the power goes out is rarely the end. It is the beginning of something much harder. The Exodus series shows the slow erosion of old rules and the painful birth of new ones. Other books rush to the action. These books stay with the people trying to remember who they were before everything changed."
+        "slug": "civilization-collapse-reality",
+        "title": "What Civilization Collapse Actually Looks Like",
+        "excerpt": "Most stories get the dramatic fall. Few understand the long, quiet aftermath that follows.",
+        "content": """When people imagine the end of the world, they usually picture sudden violence and burning cities. The reality is slower and far more difficult. The Exodus series begins after the dramatic part is already over. What remains is the long, grinding work of trying to remember how to live when every system that once supported life has disappeared.
+
+The books focus on the months and years after the collapse, not the collapse itself. This is the part most stories skip because it is not exciting. It is the part where people realize that the old rules no longer apply and new ones must be created from nothing. Trust becomes the most valuable resource, and it is earned only through consistent action over time.
+
+What makes the series stand out is how honestly it shows the psychological cost. People do not simply adapt and move on. They carry their losses into every decision. Some never recover. The books refuse to offer easy redemption or heroic transformation. They show the slow, uneven process of rebuilding when hope is in short supply.""",
+        "image": "https://picsum.photos/id/1018/1200/630"
     },
     {
-        "slug": "trust-after-the-fall",
-        "title": "Trust After the Fall",
-        "excerpt": "When institutions disappear, trust becomes the most valuable and dangerous resource.",
-        "content": "In stable societies we take trust for granted. After collapse it must be earned daily through actions, not words. The Exodus books examine how people decide who is worth risking everything for. This question sits at the center of every relationship in the story."
-    },
-    {
-        "slug": "moral-compromise-survival",
-        "title": "Moral Compromise in Survival Situations",
-        "excerpt": "What would you do to keep your family alive? The books refuse easy answers.",
-        "content": "Most post-apocalyptic fiction eventually gives characters a heroic choice. The Exodus series repeatedly forces characters into situations where every option is bad. This is closer to real human history than most readers want to admit."
-    },
-    {
-        "slug": "leadership-without-authority",
-        "title": "Leadership Without Authority",
-        "excerpt": "When governments fall, who steps up and why do people follow them?",
-        "content": "True leadership after collapse rarely comes from people who wanted the job. It comes from those who can solve problems when no one else can. The Exodus books track how authority forms organically and how quickly it can be lost."
-    },
-    {
-        "slug": "grief-and-rebuilding",
-        "title": "Grief and the Work of Rebuilding",
-        "excerpt": "You cannot rebuild what you refuse to mourn. The series understands this.",
-        "content": "Many stories treat the past as something characters simply move on from. The Exodus books show how grief shapes every decision long after the event. People carry their losses into every new community they try to build."
-    },
-    {
-        "slug": "children-after-collapse",
-        "title": "Children Born After the Collapse",
-        "excerpt": "The generation that never knew the old world sees everything differently.",
-        "content": "One of the most interesting elements in the Exodus series is how children who never experienced the old world view their parents choices. They have no nostalgia. They only see the world as it is now. This creates deep tension."
-    },
-    {
-        "slug": "resource-scarcity-psychology",
-        "title": "The Psychology of Resource Scarcity",
-        "excerpt": "When everything is limited, human behavior changes in predictable ways.",
-        "content": "The Exodus books pay close attention to how scarcity alters decision making. Small disagreements become life threatening. Generosity becomes dangerous. The series shows these shifts without judgment but with clear consequences."
-    },
-    {
-        "slug": "hope-in-dark-times",
-        "title": "Finding Hope When Hope Feels Stupid",
-        "excerpt": "Hope is not optimism. It is a decision the characters keep making.",
-        "content": "The Exodus series never offers cheap hope. Any light that appears is earned through difficult choices and real sacrifice. This makes the moments of connection between characters carry more weight than in most stories."
+        "slug": "trust-after-collapse",
+        "title": "Trust After Everything Falls Apart",
+        "excerpt": "When institutions disappear, trust must be rebuilt from zero every single day.",
+        "content": """In stable societies, trust is something we rarely think about. We trust that food will be available, that contracts will be honored, and that strangers will generally follow basic social rules. After collapse, none of these assumptions hold. Every interaction becomes a calculation of risk.
+
+The Exodus series examines this shift with unusual clarity. Characters must decide who is worth risking everything for, often with very little information. Small betrayals carry enormous consequences. The books show how communities form around shared necessity rather than shared values, and how fragile those bonds remain.
+
+This is one of the most realistic elements of the series. Trust is not a feeling. It is a repeated pattern of behavior that must be proven again and again. The stories explore what happens when that pattern breaks and how difficult it is to repair.""",
+        "image": "https://picsum.photos/id/1005/1200/630"
     }
 ]
 
@@ -61,11 +35,12 @@ def generate_article(article):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{article['title']} - Exodus Field Notes</title>
+    <title>{article['title']} - Exodus</title>
     <style>
-        body {{ font-family: system-ui, sans-serif; background: #0a0a0a; color: #ededed; max-width: 720px; margin: 0 auto; padding: 60px 24px; line-height: 1.8; }}
-        h1 {{ font-size: 2.3rem; line-height: 1.2; margin-bottom: 24px; }}
-        .meta {{ color: #666; margin-bottom: 40px; }}
+        body {{ font-family: system-ui, sans-serif; background: #0a0a0a; color: #ededed; max-width: 720px; margin: 0 auto; padding: 60px 24px; line-height: 1.85; }}
+        h1 {{ font-size: 2.4rem; line-height: 1.2; margin-bottom: 24px; }}
+        .meta {{ color: #666; margin-bottom: 32px; }}
+        img {{ width: 100%; border-radius: 12px; margin: 32px 0; }}
         .content p {{ margin-bottom: 22px; font-size: 1.08rem; }}
         .cta {{ display: block; margin: 60px auto 0; text-align: center; background: white; color: black; padding: 16px 32px; border-radius: 999px; text-decoration: none; font-weight: 600; width: fit-content; }}
     </style>
@@ -73,6 +48,7 @@ def generate_article(article):
 <body>
     <h1>{article['title']}</h1>
     <p class="meta">Exodus Field Notes - {datetime.date.today().strftime("%B %d, %Y")}</p>
+    <img src="{article['image']}" alt="">
     <div class="content">
         {article['content']}
     </div>
@@ -83,7 +59,7 @@ def generate_article(article):
         f.write(html)
 
 def generate_homepage():
-    html = """<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -128,4 +104,4 @@ if __name__ == "__main__":
     for article in ARTICLES:
         generate_article(article)
     generate_homepage()
-    print(f"Generated {len(ARTICLES)} full articles")
+    print(f"Generated {len(ARTICLES)} full essays with dark theme")
