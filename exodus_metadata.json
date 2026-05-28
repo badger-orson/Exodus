@@ -1,0 +1,56 @@
+{
+  "source_of_truth": {
+    "story_context": "Use EPUB files in /home/badgero1234/exodus-books for characters, factions, conflicts, scenes, themes, and concrete story texture.",
+    "public_metadata": "Use https://exodus.orsontbadger.com/ for current book titles, order, public descriptions, purchase anchors, and timeline dates. Official site overrides old EPUB/draft dates and former titles."
+  },
+  "series": "EXODUS",
+  "author": "Orson T. Badger",
+  "books": [
+    {
+      "position": 1,
+      "title": "Chaos Rising",
+      "former_title": "Leaving Home",
+      "official_year": 2082,
+      "site_anchor": "https://exodus.orsontbadger.com/#book-1",
+      "epub": "/home/badgero1234/exodus-books/Exodus_ Leaving Home - Orson T Badger.epub"
+    },
+    {
+      "position": 2,
+      "title": "Mutiny",
+      "former_title": "Reprisal",
+      "official_year": 2102,
+      "site_anchor": "https://exodus.orsontbadger.com/#book-2",
+      "epub": "/home/badgero1234/exodus-books/Exodus_ Reprisal (Exodus Series - Orson T Badger.epub"
+    },
+    {
+      "position": 3,
+      "title": "MoonBound",
+      "former_title": "Moonbreak",
+      "official_year": 2087,
+      "site_anchor": "https://exodus.orsontbadger.com/#book-3",
+      "epub": "/home/badgero1234/exodus-books/Exodus_ Moonbreak (Exodus Serie - Orson T Badger.epub"
+    },
+    {
+      "position": 4,
+      "title": "BioRift",
+      "former_title": "Ragtags",
+      "official_year": 2898,
+      "site_anchor": "https://exodus.orsontbadger.com/#book-4",
+      "epub": "/home/badgero1234/exodus-books/Exodus_ Ragtags (Exodus Series - Orson T Badger.epub"
+    },
+    {
+      "position": 5,
+      "title": "SandRats",
+      "former_title": "Sandrats of Azaa",
+      "official_year": 2898,
+      "site_anchor": "https://exodus.orsontbadger.com/#book-5",
+      "epub": "/home/badgero1234/exodus-books/Sandrats of Azaa (Exodus Series - Orson T Badger.epub"
+    }
+  ],
+  "article_defaults": {
+    "type": "short conversion-focused field note",
+    "visible_word_count_target": "800-1200 unless user requests otherwise",
+    "forbidden_visible_text": ["2032", "2034", "2035", "2036", "2037", "Leaving Home", "Reprisal", "Moonbreak", "Ragtags", "Sandrats of Azaa", "—"],
+    "required_cta_base": "https://exodus.orsontbadger.com"
+  }
+}
