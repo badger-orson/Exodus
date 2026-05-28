@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>What Civilization Collapse Actually Looks Like - Exodus</title>
-    <style>
-        body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #ededed; max-width: 720px; margin: 0 auto; padding: 60px 24px; line-height: 1.85; }
-        h1 { font-size: 2.4rem; line-height: 1.2; margin-bottom: 24px; }
-        .meta { color: #666; margin-bottom: 32px; }
-        img { width: 100%; border-radius: 12px; margin: 32px 0; }
-        .content p { margin-bottom: 22px; font-size: 1.08rem; }
-        .cta { display: block; margin: 60px auto 0; text-align: center; background: white; color: black; padding: 16px 32px; border-radius: 999px; text-decoration: none; font-weight: 600; width: fit-content; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="When people imagine the end of the world, they usually picture sudden violence and burning cities. The reality is slower and far more difficult. The Exodus series begins after the...">
+<title>What Civilization Collapse Actually Looks Like · Exodus Field Notes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;500;600;700;800&display=swap');
+:root { --bg:#080808; --card:#141414; --border:#24201d; --text:#ede8e0; --dim:#948a80; --orange:#ff6b1a; --hot:#ff2d7b; --green:#39e75f; --fire:linear-gradient(135deg,#e8175d 0%,#ff4a3d 42%,#ff6b1a 100%); --pad:clamp(1.25rem,4vw,3.5rem); --max:72rem; --radius:18px; }
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;line-height:1.65;overflow-x:hidden} body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 12% 8%,rgba(232,23,93,.22),transparent 42%),radial-gradient(ellipse at 88% 12%,rgba(255,107,26,.16),transparent 35%),#080808} body:after{content:'';position:fixed;inset:0;pointer-events:none;z-index:99;opacity:.22;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E")}
+a{color:inherit;text-decoration:none}.nav{max-width:var(--max);margin:0 auto;padding:1rem var(--pad);display:flex;justify-content:space-between;gap:1rem;color:var(--dim);font-family:'Space Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}.brand{color:var(--text);font-weight:700}.pill{border:1px solid rgba(255,107,26,.35);border-radius:999px;padding:.45rem .8rem;background:rgba(255,107,26,.08)}.hero{max-width:var(--max);margin:0 auto;padding:clamp(3rem,8vw,7rem) var(--pad) clamp(2rem,5vw,4rem);display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(2rem,5vw,4rem);align-items:end}.eyebrow{font-family:'Space Mono',monospace;color:var(--orange);font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;margin-bottom:1rem}.hero h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(4.8rem,15vw,11rem);line-height:.82;margin:0}.gradient{background:var(--fire);-webkit-background-clip:text;background-clip:text;color:transparent}.lede{font-size:clamp(1.08rem,2.2vw,1.45rem);color:#cfc6bd;max-width:42rem}.hero-panel,.post-card{background:linear-gradient(180deg,var(--card),#101010);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 20px 80px rgba(0,0,0,.35)}.hero-panel{padding:1.25rem}.stat{display:flex;justify-content:space-between;border-bottom:1px solid #24201d;padding:.85rem 0;font-family:'Space Mono',monospace;font-size:.82rem}.stat:last-child{border-bottom:0}.stat strong{color:var(--green)}.section{max-width:var(--max);margin:0 auto;padding:0 var(--pad) 5rem}.section-head{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin:0 0 1.5rem}.section h2{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(2.2rem,5vw,4.5rem);line-height:.9;margin:0}.section-note{font-family:'Space Mono',monospace;color:var(--dim);font-size:.8rem}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.post-card{min-height:20rem;display:flex;flex-direction:column;justify-content:space-between;padding:1.35rem;position:relative;overflow:hidden}.post-card:before{content:'';position:absolute;inset:0 0 auto;height:5px;background:var(--fire)}.post-meta{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem}.post-card h3{font-size:clamp(1.55rem,2.5vw,2.15rem);line-height:1.02;margin:.5rem 0 1rem}.post-card p{color:#b8afa6}.read-more,.cta{display:inline-flex;width:max-content;color:#080808;background:var(--fire);border-radius:999px;padding:.75rem 1rem;font-weight:800}.footer{border-top:1px solid var(--border);padding:2rem var(--pad);color:var(--dim);font-family:'Space Mono',monospace;font-size:.78rem;text-align:center}.article-wrap{max-width:50rem;margin:0 auto;padding:clamp(2rem,5vw,4rem) var(--pad) 5rem}.article-hero{padding-top:2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}.article-hero h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(3.2rem,9vw,6.8rem);line-height:.86;margin:.5rem 0 1rem}.article-meta{font-family:'Space Mono',monospace;color:var(--orange);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em}.article-image{width:100%;border-radius:var(--radius);margin:2rem 0;border:1px solid var(--border)}.content{font-size:clamp(1.05rem,1.8vw,1.18rem);color:#ddd4cb}.content p{margin:0 0 1.45rem}.cta{display:block;text-align:center;width:auto;margin:3rem 0 0}.back{display:inline-flex;margin:1rem 0 0;color:var(--dim);font-family:'Space Mono',monospace;font-size:.78rem;text-transform:uppercase}@media(max-width:900px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}@media(max-width:640px){.hero{padding-top:2.5rem}.grid{grid-template-columns:1fr}.post-card{min-height:16rem}.section-head{display:block}.pill{display:none}}
+</style>
 </head>
 <body>
-    <h1>What Civilization Collapse Actually Looks Like</h1>
-    <p class="meta">Exodus Field Notes - May 28, 2026</p>
-    <img src="https://picsum.photos/id/1018/1200/630" alt="">
-    <div class="content">
-        When people imagine the end of the world, they usually picture sudden violence and burning cities. The reality is slower and far more difficult. The Exodus series begins after the dramatic part is already over. What remains is the long, grinding work of trying to remember how to live when every system that once supported life has disappeared.
+<div class="site">
+  <nav class="nav"><a class="brand" href="../">EXODUS FIELD NOTES</a><a class="pill" href="https://exodus.orsontbadger.com">Read the books</a></nav>
+  <main class="article-wrap">
+    <a class="back" href="../">← Back to essays</a>
+    <header class="article-hero">
+      <div class="article-meta">Exodus Field Notes - May 28, 2026</div>
+      <h1>What Civilization Collapse Actually Looks Like</h1>
+      <img class="article-image" src="https://picsum.photos/id/1018/1200/630" alt="Abstract cinematic Exodus field note artwork">
+    </header>
+    <article class="content">
+      When people imagine the end of the world, they usually picture sudden violence and burning cities. The reality is slower and far more difficult. The Exodus series begins after the dramatic part is already over. What remains is the long, grinding work of trying to remember how to live when every system that once supported life has disappeared.
 
 The books focus on the months and years after the collapse, not the collapse itself. This is the part most stories skip because it is not exciting. It is the part where people realize that the old rules no longer apply and new ones must be created from nothing. Trust becomes the most valuable resource, and it is earned only through consistent action over time.
 
@@ -63,7 +68,10 @@ The books are most powerful when they focus on the ordinary days. A crew member 
 The arrival at the destination system is not a climax. It is another problem. The planet is marginally habitable. The atmosphere is thin. The soil is poor. The first landing parties discover that the automated probes have failed. The greenhouses they were supposed to build are empty frames. The water extraction systems are buried under dust storms. The crew must decide whether to commit the remaining resources to the surface or to remain on the ship. The decision is never made cleanly. It is made in pieces over months as more information arrives and more people die.
 
 The final image of the series is not of a new civilization rising. It is of two people checking the seals on their suits before stepping out onto a planet that may or may not support them. They have no guarantees. They have only each other and the knowledge that the ship behind them is no longer a viable home. The books end with the airlock opening. What happens after is left for the reader to imagine.
-    </div>
+    </article>
     <a href="https://exodus.orsontbadger.com" class="cta">Read the Exodus series</a>
+  </main>
+  <footer class="footer">Exodus Field Notes · Long-form analysis for Orson T. Badger's universe</footer>
+</div>
 </body>
 </html>
