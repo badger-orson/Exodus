@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exodus Blog - Full 3000-4000 word essays + strong dark visual theme"""
+"""Exodus Blog - concise official-timeline field notes + strong dark visual theme"""
 
 import datetime
 import os
@@ -167,7 +167,7 @@ def generate_homepage():
     cards = ""
     for i, article in enumerate(articles, 1):
         cards += f"""<article class='post-card'><div><div class='post-meta'>Field Note {i:02d} · Exodus Analysis</div><h3>{article['title']}</h3><p>{article['excerpt']}</p></div><a class='read-more' href='articles/{article['slug']}.html'>Read essay</a></article>"""
-    html = f"""<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Long-form field notes on Orson T. Badger Exodus series.'><title>Exodus Field Notes · Orson T. Badger</title><style>{STYLE}</style></head><body><div class='site'><nav class='nav'><a class='brand' href='./'>EXODUS FIELD NOTES</a><a class='pill' href='https://exodus.orsontbadger.com/#book-1'>Start with Chaos Rising</a></nav><header class='hero'><div class='eyebrow'>Orson T. Badger · Book promotion journal</div><h1>EXODUS <span class='gradient'>FIELD NOTES</span></h1><p class='lede'>A dark, long-form reading room for the launch years, the Freemen resistance, EDCP duplicates, and the cost of leaving home.</p><div class='hero-actions'><a class='cta' href='https://exodus.orsontbadger.com/#book-1'>Start with Chaos Rising</a></div></header><main class='section'><div class='section-head'><h2>Latest essays</h2><div class='section-note'>Readable on phones, tablets, and wide screens</div></div><div class='grid'>{cards}</div></main><footer class='footer'>Long-form analysis and reading paths for the Exodus series.</footer></div></body></html>"""
+    html = f"""<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Long-form field notes on Orson T. Badger Exodus series.'><title>Exodus Field Notes · Orson T. Badger</title><style>{STYLE}</style></head><body><div class='site'><nav class='nav'><a class='brand' href='./'>EXODUS FIELD NOTES</a><a class='pill' href='https://exodus.orsontbadger.com/#book-1'>Start with Chaos Rising</a></nav><header class='hero'><div class='eyebrow'>Orson T. Badger · Book promotion journal</div><h1>EXODUS <span class='gradient'>FIELD NOTES</span></h1><p class='lede'>Short, sharp reading paths into the Exodus saga: Chaos Rising in 2082, Mutiny in 2102, MoonBound in 2087, and the Altair-era conflicts of 2898.</p><div class='hero-actions'><a class='cta' href='https://exodus.orsontbadger.com/#book-1'>Start with Chaos Rising</a></div></header><main class='section'><div class='section-head'><h2>Latest essays</h2><div class='section-note'>Readable on phones, tablets, and wide screens</div></div><div class='grid'>{cards}</div></main><footer class='footer'>Long-form analysis and reading paths for the Exodus series.</footer></div></body></html>"""
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
@@ -178,4 +178,4 @@ if __name__ == "__main__":
         if not os.path.exists(article_path):
             generate_article(article)
     generate_homepage()
-    print(f"Generated {len(ARTICLES)} full essays with dark theme")
+    print(f"Generated {len(ARTICLES)} concise official-timeline field notes with dark theme")
