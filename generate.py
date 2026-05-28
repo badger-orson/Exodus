@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
-"""Exodus Blog - Clean, modern design inspired by zuuned.com"""
+"""Exodus Blog - Dark theme + visual homepage (zuuned-inspired)"""
 
 import datetime
 
 def generate_site():
     date = datetime.date.today().strftime("%B %d, %Y")
-    
-    posts = [
-        {
-            "title": "What Actually Happens When Civilization Collapses",
-            "content": "Most post-apocalyptic stories focus on the action. The Exodus series focuses on what comes after — the slow, grinding reality of rebuilding when every system you relied on is gone. This is the part most people get wrong."
-        },
-        {
-            "title": "The Hidden Cost of Starting Over",
-            "content": "Starting over after everything is destroyed isn't romantic. It's exhausting. The Exodus books don't skip the psychological toll — the grief, the moral compromises, and the constant calculation of who you can still trust."
-        }
-    ]
     
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -27,95 +16,173 @@ def generate_site():
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
         
         :root {{
-            --bg: #fafafa;
-            --text: #111;
-            --muted: #666;
-            --accent: #111;
+            --bg: #0a0a0a;
+            --card: #111;
+            --text: #ededed;
+            --muted: #888;
         }}
         
         body {{
             font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
-            max-width: 720px;
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }}
+        
+        .header {{
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 60px 24px;
-            line-height: 1.75;
+            padding: 60px 24px 40px;
+            text-align: center;
         }}
         
         h1 {{
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.6rem;
+            font-size: 3.2rem;
             font-weight: 600;
             letter-spacing: -0.04em;
-            margin: 0 0 12px;
+            margin: 0 0 16px;
         }}
         
-        .meta {{
+        .tagline {{
             color: var(--muted);
-            font-size: 1rem;
-            margin-bottom: 64px;
+            font-size: 1.2rem;
+        }}
+        
+        .hero {{
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }}
+        
+        .hero-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }}
+        
+        .hero-card {{
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }}
+        
+        .hero-card img {{
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }}
+        
+        .hero-card-content {{
+            padding: 24px;
+        }}
+        
+        .hero-card h3 {{
+            margin: 0 0 12px;
+            font-size: 1.35rem;
+        }}
+        
+        .section {{
+            max-width: 1100px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }}
+        
+        .post-list {{
+            display: grid;
+            gap: 32px;
         }}
         
         .post {{
-            margin-bottom: 72px;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid #222;
         }}
         
         .post h2 {{
             font-size: 1.65rem;
-            font-weight: 600;
-            line-height: 1.3;
-            margin: 0 0 18px;
+            margin: 0 0 16px;
         }}
         
         .post p {{
-            color: #333;
+            color: #ccc;
             font-size: 1.05rem;
         }}
         
         .cta {{
             display: inline-block;
-            margin-top: 24px;
+            margin-top: 20px;
             padding: 14px 28px;
-            background: #111;
-            color: white;
+            background: white;
+            color: black;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 999px;
             font-weight: 600;
-            font-size: 0.95rem;
         }}
         
         .footer {{
-            margin-top: 100px;
+            text-align: center;
+            padding: 60px 24px;
+            color: #555;
             font-size: 0.9rem;
-            color: #888;
         }}
     </style>
 </head>
 <body>
-    <h1>Exodus</h1>
-    <p class="meta">Field notes on collapse, survival, and what comes after • {date}</p>
-"""
-    
-    for post in posts:
-        html += f"""
-    <div class="post">
-        <h2>{post['title']}</h2>
-        <p>{post['content']}</p>
-        <a href="https://exodus.orsontbadger.com" class="cta">Read the series →</a>
+    <div class="header">
+        <h1>Exodus</h1>
+        <p class="tagline">Field notes from the edge of collapse • {date}</p>
     </div>
-"""
     
-    html += """
+    <div class="hero">
+        <div class="hero-grid">
+            <div class="hero-card">
+                <img src="https://picsum.photos/id/1015/800/600" alt="Wasteland landscape">
+                <div class="hero-card-content">
+                    <h3>The Weight of Survival</h3>
+                    <p>What the books get right about the real cost of living when everything is gone.</p>
+                </div>
+            </div>
+            <div class="hero-card">
+                <img src="https://picsum.photos/id/1005/800/600" alt="Abandoned structures">
+                <div class="hero-card-content">
+                    <h3>Who Do You Become?</h3>
+                    <p>The moral questions that actually matter when society stops protecting us.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="post-list">
+            <div class="post">
+                <h2>What Actually Happens When Civilization Collapses</h2>
+                <p>Most stories focus on the dramatic fall. The Exodus series focuses on the much harder part — what comes after. The slow, grinding work of rebuilding when trust, resources, and hope are all in short supply.</p>
+                <a href="https://exodus.orsontbadger.com" class="cta">Read the series →</a>
+            </div>
+            
+            <div class="post">
+                <h2>The Hidden Cost of Starting Over</h2>
+                <p>Starting over after everything is destroyed isn't the romantic fresh start people imagine. The Exodus books show the real psychological and moral price — and why some people never recover.</p>
+                <a href="https://exodus.orsontbadger.com" class="cta">Read the series →</a>
+            </div>
+        </div>
+    </div>
+    
     <div class="footer">
-        Exploring the questions at the heart of the Exodus series by Orson T. Badger.
+        Exploring the questions at the heart of the Exodus series.
     </div>
 </body>
 </html>"""
     
     with open("index.html", "w") as f:
         f.write(html)
-    print("Generated zuuned-inspired design")
+    print("Generated dark theme with visuals")
 
 if __name__ == "__main__":
     generate_site()
