@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exodus Blog - High-quality SEO/GEO/AEO content generator"""
+"""Exodus Blog - Clean, modern design inspired by zuuned.com"""
 
 import datetime
 
@@ -9,65 +9,113 @@ def generate_site():
     posts = [
         {
             "title": "What Actually Happens When Civilization Collapses",
-            "slug": "civilization-collapse",
-            "content": """Most post-apocalyptic stories focus on the action. The Exodus series focuses on what comes after — the slow, grinding reality of rebuilding when every system you relied on is gone.
-
-This is the part most people get wrong. It's not just about guns and supplies. It's about trust, leadership, and the brutal math of who gets to survive when resources are finite.
-
-The books explore these questions without easy answers.""",
-            "cta": "See how the story unfolds in the Exodus series"
+            "content": "Most post-apocalyptic stories focus on the action. The Exodus series focuses on what comes after — the slow, grinding reality of rebuilding when every system you relied on is gone. This is the part most people get wrong."
         },
         {
             "title": "The Hidden Cost of Starting Over",
-            "slug": "hidden-cost",
-            "content": """Starting over after everything is destroyed isn't romantic. It's exhausting. The Exodus books don't skip the psychological toll — the grief, the moral compromises, and the constant calculation of who you can still trust.
-
-This is the part that makes the series feel real.""",
-            "cta": "Read the Exodus series"
+            "content": "Starting over after everything is destroyed isn't romantic. It's exhausting. The Exodus books don't skip the psychological toll — the grief, the moral compromises, and the constant calculation of who you can still trust."
         }
     ]
     
     html = f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Exodus — Field Notes from the Edge</title>
+    <title>Exodus • Field Notes</title>
     <style>
-        body {{ font-family: system-ui, -apple-system, sans-serif; max-width: 720px; margin: 60px auto; padding: 20px; line-height: 1.75; color: #222; }}
-        h1 {{ font-size: 2.1rem; margin-bottom: 8px; }}
-        .meta {{ color: #666; margin-bottom: 48px; }}
-        .post {{ margin-bottom: 72px; }}
-        .post h2 {{ font-size: 1.55rem; margin-bottom: 16px; line-height: 1.3; }}
-        .post p {{ margin-bottom: 18px; }}
-        .cta {{ display: inline-block; margin-top: 20px; padding: 12px 24px; background: #111; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }}
-        .footer {{ margin-top: 80px; font-size: 0.9rem; color: #777; }}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        :root {{
+            --bg: #fafafa;
+            --text: #111;
+            --muted: #666;
+            --accent: #111;
+        }}
+        
+        body {{
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            line-height: 1.75;
+        }}
+        
+        h1 {{
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            margin: 0 0 12px;
+        }}
+        
+        .meta {{
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 64px;
+        }}
+        
+        .post {{
+            margin-bottom: 72px;
+        }}
+        
+        .post h2 {{
+            font-size: 1.65rem;
+            font-weight: 600;
+            line-height: 1.3;
+            margin: 0 0 18px;
+        }}
+        
+        .post p {{
+            color: #333;
+            font-size: 1.05rem;
+        }}
+        
+        .cta {{
+            display: inline-block;
+            margin-top: 24px;
+            padding: 14px 28px;
+            background: #111;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }}
+        
+        .footer {{
+            margin-top: 100px;
+            font-size: 0.9rem;
+            color: #888;
+        }}
     </style>
 </head>
 <body>
-    <h1>Exodus — Field Notes from the Edge</h1>
-    <p class="meta">Thoughtful writing on collapse, survival, and what comes after. Updated {date}.</p>
+    <h1>Exodus</h1>
+    <p class="meta">Field notes on collapse, survival, and what comes after • {date}</p>
 """
     
     for post in posts:
         html += f"""
     <div class="post">
         <h2>{post['title']}</h2>
-        {post['content'].replace(chr(10), '<p>')}
-        <a href="https://exodus.orsontbadger.com" class="cta">{post['cta']} →</a>
+        <p>{post['content']}</p>
+        <a href="https://exodus.orsontbadger.com" class="cta">Read the series →</a>
     </div>
 """
     
     html += """
     <div class="footer">
-        This site exists to explore the questions at the heart of the Exodus series.
+        Exploring the questions at the heart of the Exodus series by Orson T. Badger.
     </div>
 </body>
 </html>"""
     
     with open("index.html", "w") as f:
         f.write(html)
-    print("Generated high-quality index.html")
+    print("Generated zuuned-inspired design")
 
 if __name__ == "__main__":
     generate_site()
