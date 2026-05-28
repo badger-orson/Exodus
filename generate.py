@@ -1,59 +1,73 @@
 #!/usr/bin/env python3
-"""Exodus Book Blog - Autonomous content generator"""
+"""Exodus Blog - High-quality SEO/GEO/AEO content generator"""
 
 import datetime
 
-POSTS = [
-    {
-        "title": "What Would You Do If Society Collapsed Tomorrow?",
-        "slug": "society-collapse",
-        "excerpt": "The world of Exodus explores exactly this question. Here's what the books get right about human nature when everything falls apart.",
-        "link": "https://exodus.orsontbadger.com"
-    },
-    {
-        "title": "The Real Cost of Starting Over After Everything Is Gone",
-        "slug": "starting-over",
-        "excerpt": "Most post-apocalyptic stories skip the hard part. Exodus doesn't. The emotional and practical price of rebuilding is the core of the series.",
-        "link": "https://exodus.orsontbadger.com"
-    },
-]
+def generate_site():
+    date = datetime.date.today().strftime("%B %d, %Y")
+    
+    posts = [
+        {
+            "title": "What Actually Happens When Civilization Collapses",
+            "slug": "civilization-collapse",
+            "content": """Most post-apocalyptic stories focus on the action. The Exodus series focuses on what comes after — the slow, grinding reality of rebuilding when every system you relied on is gone.
 
-def generate_index():
-    html = """<!DOCTYPE html>
+This is the part most people get wrong. It's not just about guns and supplies. It's about trust, leadership, and the brutal math of who gets to survive when resources are finite.
+
+The books explore these questions without easy answers.""",
+            "cta": "See how the story unfolds in the Exodus series"
+        },
+        {
+            "title": "The Hidden Cost of Starting Over",
+            "slug": "hidden-cost",
+            "content": """Starting over after everything is destroyed isn't romantic. It's exhausting. The Exodus books don't skip the psychological toll — the grief, the moral compromises, and the constant calculation of who you can still trust.
+
+This is the part that makes the series feel real.""",
+            "cta": "Read the Exodus series"
+        }
+    ]
+    
+    html = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Exodus — Thoughts from the Wasteland</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exodus — Field Notes from the Edge</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 720px; margin: 60px auto; padding: 20px; line-height: 1.7; }
-        h1 { font-size: 2.2rem; }
-        .post { margin-bottom: 48px; }
-        .title { font-size: 1.45rem; margin-bottom: 8px; }
-        .excerpt { color: #444; }
-        .cta { display: inline-block; margin-top: 12px; padding: 10px 18px; background: #111; color: white; text-decoration: none; border-radius: 6px; }
+        body {{ font-family: system-ui, -apple-system, sans-serif; max-width: 720px; margin: 60px auto; padding: 20px; line-height: 1.75; color: #222; }}
+        h1 {{ font-size: 2.1rem; margin-bottom: 8px; }}
+        .meta {{ color: #666; margin-bottom: 48px; }}
+        .post {{ margin-bottom: 72px; }}
+        .post h2 {{ font-size: 1.55rem; margin-bottom: 16px; line-height: 1.3; }}
+        .post p {{ margin-bottom: 18px; }}
+        .cta {{ display: inline-block; margin-top: 20px; padding: 12px 24px; background: #111; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }}
+        .footer {{ margin-top: 80px; font-size: 0.9rem; color: #777; }}
     </style>
 </head>
 <body>
-    <h1>Exodus — Thoughts from the Wasteland</h1>
-    <p>Stories and ideas from the world of the Exodus series by Orson T. Badger.</p>
+    <h1>Exodus — Field Notes from the Edge</h1>
+    <p class="meta">Thoughtful writing on collapse, survival, and what comes after. Updated {date}.</p>
 """
-
-    for post in POSTS:
+    
+    for post in posts:
         html += f"""
     <div class="post">
-        <div class="title">{post['title']}</div>
-        <div class="excerpt">{post['excerpt']}</div>
-        <a href="{post['link']}" class="cta">Read the books →</a>
+        <h2>{post['title']}</h2>
+        {post['content'].replace(chr(10), '<p>')}
+        <a href="https://exodus.orsontbadger.com" class="cta">{post['cta']} →</a>
     </div>
 """
-
+    
     html += """
+    <div class="footer">
+        This site exists to explore the questions at the heart of the Exodus series.
+    </div>
 </body>
 </html>"""
-
+    
     with open("index.html", "w") as f:
         f.write(html)
-    print("Generated index.html")
+    print("Generated high-quality index.html")
 
 if __name__ == "__main__":
-    generate_index()
+    generate_site()
