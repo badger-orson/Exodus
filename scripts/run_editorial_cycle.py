@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from typing import Any, Iterable
 
+from scripts import exodus_common
 from scripts.extract_sources import build_source_cache
 from scripts.publish_ready import publish_one_ready_draft
 from scripts.validate_sources import validate_source_cache
@@ -27,10 +28,17 @@ DRAFT_SCHEMA = {
     "topic_id": "source-backed-topic-id",
     "topic": "topic label",
     "thesis": "specific non-generic thesis",
-    "source_chunks": ["chaos-rising:0000", "chaos-rising:0001"],
+    "source_chunks": ["<selected_chunk_id_1>", "<selected_chunk_id_2>"],
     "concrete_details": ["detail one", "detail two", "detail three"],
     "body_html": "<p>800-1200 visible words with CTA anchor.</p>",
 }
+
+
+def _is_publishable_context_chunk(chunk: dict[str, Any]) -> bool:
+    text = str(chunk.get("text", ""))
+    if int(chunk.get("word_count", 0)) < 150:
+        return False
+    return not exodus_common.find_forbidden_visible_text(text)
 
 
 def _select_context(root: Path) -> dict[str, Any]:
@@ -39,6 +47,8 @@ def _select_context(root: Path) -> dict[str, Any]:
     for chunk_file in sorted(chunks_dir.glob("*.json")):
         chunks = json.loads(chunk_file.read_text(encoding="utf-8"))
         for chunk in chunks:
+            if not _is_publishable_context_chunk(chunk):
+                continue
             selected.append(
                 {
                     "id": chunk.get("id"),

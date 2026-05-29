@@ -58,13 +58,13 @@ articles/*.html               # published article pages
 index.html                    # homepage
 ```
 
-Existing files to retire after V2 is verified:
+Retired V1 file after V2 verification:
 
 ```text
-publish_one.py                # V1 queue publisher
+publish_one.py                # deleted after V2 published successfully and cron moved to scripts/run_editorial_cycle.py
 ```
 
-Do not delete V1 until V2 has published at least one article successfully and cron has been updated.
+Do not restore V1 unless rolling back the V2 cron and V2 publishing stack.
 
 ---
 
