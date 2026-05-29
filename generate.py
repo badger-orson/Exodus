@@ -141,10 +141,16 @@ def discover_existing_articles():
     existing = []
     if not os.path.isdir("articles"):
         return existing
-    for filename in sorted(os.listdir("articles")):
+    article_files = []
+    for filename in os.listdir("articles"):
         if not filename.endswith(".html"):
             continue
         path = os.path.join("articles", filename)
+        try:
+            article_files.append((os.path.getmtime(path), filename, path))
+        except OSError:
+            pass
+    for _, filename, path in sorted(article_files, reverse=True):
         try:
             with open(path, encoding="utf-8") as f:
                 html_text = f.read()
