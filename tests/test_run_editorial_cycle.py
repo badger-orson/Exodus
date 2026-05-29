@@ -54,8 +54,8 @@ class RunEditorialCycleTests(unittest.TestCase):
 
             self.assertTrue(result["ok"], result)
             self.assertEqual(result["status"], "PUBLISHED")
-            self.assertTrue((root / "articles" / "biorift-biorift-0006-field-note.html").exists())
-            self.assertTrue((root / "article_meta" / "biorift-biorift-0006-field-note.json").exists())
+            self.assertTrue((root / "articles" / "biorift-biorift-0006-article.html").exists())
+            self.assertTrue((root / "article_meta" / "biorift-biorift-0006-article.json").exists())
             self.assertFalse(list((root / "drafts" / "ready").glob("*.json")))
 
 

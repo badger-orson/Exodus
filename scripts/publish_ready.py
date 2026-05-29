@@ -83,7 +83,7 @@ def _fallback_generate_homepage(root: Path) -> None:
         text = article.read_text(encoding="utf-8")
         title_match = re.search(r"<h1>(.*?)</h1>", text, re.S)
         title = title_match.group(1) if title_match else article.stem.replace("-", " ").title()
-        cards.append(f"<article class='post-card'><div><div class='post-meta'>Field Note {note:02d} · Exodus Analysis</div><h3>{title}</h3><p>Source-backed Exodus field note.</p></div><a class='read-more' href='articles/{article.name}'>Read essay</a></article>")
+        cards.append(f"<article class='post-card'><div><div class='post-meta'>Essay {note:02d} · Exodus Books</div><h3>{title}</h3><p>A sharp path into the Exodus series.</p></div><a class='read-more' href='articles/{article.name}'>Read essay</a></article>")
     html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'><style>.grid{}.article-wrap{}.post-card{}.sticky-cta{}.sales-card{}</style></head><body><div class='grid'>" + "".join(cards) + "</div></body></html>"
     (root / "index.html").write_text(html, encoding="utf-8")
 
@@ -125,11 +125,11 @@ def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, An
     cards = re.findall(r"<article class='post-card'>.*?</article>", html, re.S)
     numbers = []
     for card in cards:
-        match = re.search(r"Field Note (\d+)", card)
+        match = re.search(r"Essay (\d+)", card)
         if match:
             numbers.append(int(match.group(1)))
     if numbers and numbers[0] != max(numbers):
-        errors.append("top homepage card does not have highest Field Note number")
+        errors.append("top homepage card does not have highest Essay number")
     return {"ok": not errors, "errors": errors, "article_count": len(article_files), "linked_count": len(linked)}
 
 
