@@ -185,4 +185,4 @@ if __name__ == "__main__":
         if not os.path.exists(article_path):
             generate_article(article)
     generate_homepage()
-    print(f"Generated {len(ARTICLES)} concise official-timeline field notes with dark theme")
+    print(f"Generated homepage with {len(discover_existing_articles())} linked field notes and dark theme")
