@@ -146,6 +146,20 @@
       "thesis": "Chaos Rising shows that survival in 2082 belongs to people who can read danger clearly, act with discipline, and keep moving when every system around them starts lying.",
       "topic": "survival under pressure",
       "used_at": "2026-05-30T15:50:09+00:00"
+    },
+    {
+      "book_slug": "moonbound",
+      "id": "moonbound-moonbound-0181-article",
+      "thesis": "MoonBound shows that survival in 2087 belongs to people who can read danger clearly, act with discipline, and keep moving when every system around them starts lying.",
+      "topic": "survival under pressure",
+      "used_at": "2026-05-30T16:00:47+00:00"
+    },
+    {
+      "book_slug": "sandrats",
+      "id": "sandrats-sandrats-0267-article",
+      "thesis": "SandRats shows that survival in 2898 belongs to people who can read danger clearly, act with discipline, and keep moving when every system around them starts lying.",
+      "topic": "survival under pressure",
+      "used_at": "2026-05-30T16:20:38+00:00"
     }
   ]
 }
