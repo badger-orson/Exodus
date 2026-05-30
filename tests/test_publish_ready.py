@@ -48,6 +48,20 @@ class PublishReadyTests(unittest.TestCase):
             self.assertIn("chaos-rising-discipline.html", (root / "index.html").read_text(encoding="utf-8"))
             self.assertTrue(validate_homepage_links_and_order(root=root)["ok"])
 
+    def test_homepage_validation_rejects_duplicate_article_titles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            articles = root / "articles"
+            articles.mkdir()
+            (articles / "one.html").write_text("<h1>Same Title</h1>", encoding="utf-8")
+            (articles / "two.html").write_text("<h1>Same Title</h1>", encoding="utf-8")
+            (root / "index.html").write_text("<style>.grid{}.article-wrap{}.post-card{}.sticky-cta{}.sales-card{}</style><article class='post-card'><div>Essay 02</div><a href='articles/two.html'>Read</a></article><article class='post-card'><div>Essay 01</div><a href='articles/one.html'>Read</a></article>", encoding="utf-8")
+
+            result = validate_homepage_links_and_order(root=root)
+
+            self.assertFalse(result["ok"])
+            self.assertTrue(any("duplicate article title Same Title" in error for error in result["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()

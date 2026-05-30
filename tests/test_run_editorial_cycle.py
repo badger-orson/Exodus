@@ -58,6 +58,25 @@ class RunEditorialCycleTests(unittest.TestCase):
             self.assertTrue((root / "article_meta" / "biorift-biorift-0006-article.json").exists())
             self.assertFalse(list((root / "drafts" / "ready").glob("*.json")))
 
+    def test_run_editorial_cycle_does_not_repeat_existing_article_title(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            chunks = root / "source_cache" / "chunks"
+            chunks.mkdir(parents=True)
+            (root / "articles").mkdir()
+            (root / "articles" / "old.html").write_text("<h1>The Future Does Not Save Us. It Gives the Monsters Better Tools</h1>", encoding="utf-8")
+            (root / "source_cache" / "books.json").write_text(json.dumps({"books": [{"book_slug": "biorift", "chunk_count": 2, "chunks_path": str(chunks / "biorift.json"), "official_title": "BioRift", "official_year": 2898, "source_path": "book.epub"}]}), encoding="utf-8")
+            source_text = "Miah Elias Sergeant Anders Earthers Dome 3 Ark Police Portar tourniquet lift shaft security troops ag-workers reception counter optical nerves survival pressure " * 20
+            (chunks / "biorift.json").write_text(json.dumps([
+                {"id": "biorift:0006", "book_slug": "biorift", "official_title": "BioRift", "official_year": 2898, "text": source_text, "word_count": 240},
+                {"id": "biorift:0007", "book_slug": "biorift", "official_title": "BioRift", "official_year": 2898, "text": source_text, "word_count": 240},
+            ]), encoding="utf-8")
+
+            result = run_editorial_cycle(root=root, allow_extract=False)
+
+            self.assertTrue(result["ok"], result)
+            self.assertNotEqual(result["title"], "The Future Does Not Save Us. It Gives the Monsters Better Tools")
+
 
 if __name__ == "__main__":
     unittest.main()

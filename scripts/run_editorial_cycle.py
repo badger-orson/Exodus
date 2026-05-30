@@ -141,15 +141,76 @@ def _select_context(root: Path) -> dict[str, Any]:
     return {"selected_source_chunks": selected, "draft_schema": DRAFT_SCHEMA}
 
 
-def _catchy_title(official_title: str) -> str:
-    titles = {
-        "Chaos Rising": "The First Thing Tyrants Kill Is Competence",
-        "Mutiny": "The Ship Was Supposed to Save Humanity. Then Humanity Got Inside It",
-        "MoonBound": "Prison Looks Different When It Has a Horizon",
-        "BioRift": "The Future Does Not Save Us. It Gives the Monsters Better Tools",
-        "SandRats": "The Promised World Was a Desert With Teeth",
+def _published_titles(root: Path) -> set[str]:
+    titles: set[str] = set()
+    for article in (root / "articles").glob("*.html"):
+        text = article.read_text(encoding="utf-8", errors="ignore")
+        match = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S | re.I)
+        if match:
+            title = re.sub(r"<[^>]+>", " ", match.group(1))
+            title = " ".join(html.unescape(title).split())
+            if title:
+                titles.add(title)
+    return titles
+
+
+def _numeric_suffix(value: str) -> int:
+    numbers = re.findall(r"\d+", value)
+    return int(numbers[-1]) if numbers else 0
+
+
+def _catchy_title(official_title: str, topic_id: str, existing_titles: set[str]) -> str:
+    title_bank = {
+        "Chaos Rising": [
+            "The First Thing Tyrants Kill Is Competence",
+            "Before the Ark, the Curfew Came First",
+            "The Rebellion Begins With a Hidden Lesson",
+            "A Regime Fears the People Who Can Fix Things",
+            "The Compliance Army Was Afraid of Memory",
+        ],
+        "Mutiny": [
+            "The Ship Was Supposed to Save Humanity. Then Humanity Got Inside It",
+            "A Generation Ship Is No Place for Betrayal",
+            "The Ark Survived Launch. Trust Did Not",
+            "When the Crew Turns the Lifeboat Into a Battlefield",
+            "Two Trillion Miles From Earth, Human Nature Still Finds the Knife",
+        ],
+        "MoonBound": [
+            "Prison Looks Different When It Has a Horizon",
+            "The Moon Was Supposed to Be Where Resistance Died",
+            "The Hole Could Not Bury the Freemen",
+            "A Lunar Prison Makes Escape a Systems Problem",
+            "Resistance Survives Where Roads Do Not Exist",
+        ],
+        "BioRift": [
+            "The Future Does Not Save Us. It Gives the Monsters Better Tools",
+            "Dome 3 Is Where the Clean Future Cracks",
+            "In the Altair Rift, Survival Starts Before the Alarm",
+            "The Monsters in BioRift Wear Systems Like Armor",
+            "The Future Learned to File Fear as Procedure",
+            "When Security Becomes the Weather",
+            "The Ark Police Are Not the Scariest Thing in BioRift",
+            "Survival Begins With Reading the Room",
+            "A Shiny Future Still Needs Someone to Bleed in the Lift Shaft",
+            "The Altair Rift Turns Competence Into a Weapon",
+            "BioRift Makes Survival Industrial",
+            "The Future Is Clean Until the Counter Turns Into a Checkpoint",
+        ],
+        "SandRats": [
+            "The Promised World Was a Desert With Teeth",
+            "The Frontier Does Not Care Who Was Promised a Future",
+            "Water Is the First Law of the New World",
+            "The Desert Teaches Faster Than Civilization",
+            "Survival Gets Smaller and Meaner After Arrival",
+        ],
     }
-    return titles.get(official_title, f"The Future Breaks Differently in {official_title}")
+    titles = title_bank.get(official_title, [f"The Future Breaks Differently in {official_title}"])
+    start = _numeric_suffix(topic_id) % len(titles)
+    for offset in range(len(titles)):
+        candidate = titles[(start + offset) % len(titles)]
+        if candidate not in existing_titles:
+            return candidate
+    return f"{titles[start]} in {official_title} {_numeric_suffix(topic_id):04d}"
 
 
 def _build_deterministic_draft(root: Path, selected: list[dict[str, Any]]) -> dict[str, Any]:
@@ -168,7 +229,7 @@ def _build_deterministic_draft(root: Path, selected: list[dict[str, Any]]) -> di
     topic_id = f"{book_slug}-{chunk_ids[0]}-article".replace(":", "-")
     slug = topic_id.replace("_", "-")
     site_anchor = _site_anchor_for_book(root, book_slug)
-    title = _catchy_title(official_title)
+    title = _catchy_title(official_title, topic_id, _published_titles(root))
     thesis = f"{official_title} shows that survival in {official_year} belongs to people who can read danger clearly, act with discipline, and keep moving when every system around them starts lying."
     escaped = {
         key: html.escape(value)

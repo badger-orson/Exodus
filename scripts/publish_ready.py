@@ -103,6 +103,22 @@ def create_receipt(draft: dict[str, Any], visible_word_count: int) -> dict[str, 
     }
 
 
+
+
+def _strip_tags(value: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", value)).strip()
+
+
+def existing_article_titles(root: str | Path = ".") -> dict[str, list[str]]:
+    root_path = Path(root)
+    titles: dict[str, list[str]] = {}
+    for article in (root_path / "articles").glob("*.html"):
+        text = article.read_text(encoding="utf-8", errors="ignore")
+        match = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S | re.I)
+        title = _strip_tags(match.group(1)) if match else article.stem.replace("-", " ").title()
+        titles.setdefault(title, []).append(article.name)
+    return titles
+
 def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, Any]:
     root_path = Path(root)
     index = root_path / "index.html"
@@ -130,6 +146,9 @@ def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, An
             numbers.append(int(match.group(1)))
     if numbers and numbers[0] != max(numbers):
         errors.append("top homepage card does not have highest Essay number")
+    duplicate_titles = {title: files for title, files in existing_article_titles(root_path).items() if len(files) > 1}
+    for title, files in sorted(duplicate_titles.items()):
+        errors.append(f"duplicate article title {title}: {', '.join(sorted(files))}")
     return {"ok": not errors, "errors": errors, "article_count": len(article_files), "linked_count": len(linked)}
 
 
@@ -141,6 +160,11 @@ def publish_one_ready_draft(*, root: str | Path = ".") -> dict[str, Any]:
         return {"ok": False, "status": "NO_READY_DRAFT", "errors": ["no drafts/ready/*.json found"]}
 
     draft = json.loads(draft_path.read_text(encoding="utf-8"))
+    existing_titles = existing_article_titles(root_path)
+    draft_title = str(draft.get("title", ""))
+    draft_filename = f"{draft.get('slug')}.html"
+    if draft_title in existing_titles and draft_filename not in existing_titles[draft_title]:
+        return {"ok": False, "status": "DUPLICATE_TITLE", "errors": [f"title already published: {draft_title}"]}
     validation = validate_draft_article(draft, source_cache_dir=root_path / "source_cache")
     if not validation["ok"]:
         return {"ok": False, "status": "DRAFT_INVALID", "errors": validation["errors"], "draft": str(draft_path)}
