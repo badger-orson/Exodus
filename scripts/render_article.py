@@ -54,6 +54,13 @@ def render_article_html(draft: dict[str, Any]) -> str:
     </main>
     <div class="sticky-cta"><strong>EXODUS</strong><span>The signal is only the door.</span><a href="{site_anchor}">Open the book</a></div>
   </div>
+  <script>
+    (() => {{
+      const update = () => document.body.classList.toggle('is-reading', window.scrollY > 180);
+      update();
+      window.addEventListener('scroll', update, {{ passive: true }});
+    }})();
+  </script>
 </body>
 </html>
 """
