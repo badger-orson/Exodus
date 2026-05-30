@@ -125,6 +125,40 @@ def _body_fingerprint(value: str) -> str:
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
+def _word_shingles(value: str, *, size: int = 5) -> set[tuple[str, ...]]:
+    words = [word for word in re.findall(r"[a-z0-9]+", _normalize_visible_text(value)) if len(word) > 3]
+    if len(words) < size:
+        return set()
+    return set(zip(*(words[index:] for index in range(size))))
+
+
+def _jaccard(left: set[tuple[str, ...]], right: set[tuple[str, ...]]) -> float:
+    if not left or not right:
+        return 0.0
+    return len(left & right) / len(left | right)
+
+
+def existing_article_body_shingles(root: str | Path = ".") -> dict[str, set[tuple[str, ...]]]:
+    root_path = Path(root)
+    shingles: dict[str, set[tuple[str, ...]]] = {}
+    for article in (root_path / "articles").glob("*.html"):
+        text = article.read_text(encoding="utf-8", errors="ignore")
+        shingles[article.name] = _word_shingles(_article_body_html(text))
+    return shingles
+
+
+def near_duplicate_article_bodies(root: str | Path = ".", *, threshold: float = 0.72) -> list[tuple[float, str, str]]:
+    article_shingles = existing_article_body_shingles(root)
+    names = sorted(article_shingles)
+    duplicates: list[tuple[float, str, str]] = []
+    for left_index, left_name in enumerate(names):
+        for right_name in names[left_index + 1 :]:
+            score = _jaccard(article_shingles[left_name], article_shingles[right_name])
+            if score >= threshold:
+                duplicates.append((score, left_name, right_name))
+    return duplicates
+
+
 def existing_article_titles(root: str | Path = ".") -> dict[str, list[str]]:
     root_path = Path(root)
     titles: dict[str, list[str]] = {}
@@ -178,6 +212,8 @@ def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, An
     duplicate_bodies = {fingerprint: files for fingerprint, files in existing_article_body_fingerprints(root_path).items() if len(files) > 1}
     for fingerprint, files in sorted(duplicate_bodies.items()):
         errors.append(f"duplicate article body {fingerprint[:12]}: {', '.join(sorted(files))}")
+    for score, left_name, right_name in near_duplicate_article_bodies(root_path):
+        errors.append(f"near-duplicate article body {score:.2f}: {left_name}, {right_name}")
     return {"ok": not errors, "errors": errors, "article_count": len(article_files), "linked_count": len(linked)}
 
 
@@ -195,9 +231,21 @@ def publish_one_ready_draft(*, root: str | Path = ".") -> dict[str, Any]:
     if draft_title in existing_titles and draft_filename not in existing_titles[draft_title]:
         return {"ok": False, "status": "DUPLICATE_TITLE", "errors": [f"title already published: {draft_title}"]}
     existing_bodies = existing_article_body_fingerprints(root_path)
-    draft_body_fingerprint = _body_fingerprint(str(draft.get("body_html", "")))
+    draft_body = str(draft.get("body_html", ""))
+    draft_body_fingerprint = _body_fingerprint(draft_body)
     if draft_body_fingerprint in existing_bodies and draft_filename not in existing_bodies[draft_body_fingerprint]:
         return {"ok": False, "status": "DUPLICATE_BODY", "errors": [f"article body already published: {', '.join(sorted(existing_bodies[draft_body_fingerprint]))}"]}
+    draft_shingles = _word_shingles(draft_body)
+    near_matches = []
+    for article_name, article_shingles in existing_article_body_shingles(root_path).items():
+        if article_name == draft_filename:
+            continue
+        score = _jaccard(draft_shingles, article_shingles)
+        if score >= 0.72:
+            near_matches.append((score, article_name))
+    if near_matches:
+        score, article_name = sorted(near_matches, reverse=True)[0]
+        return {"ok": False, "status": "NEAR_DUPLICATE_BODY", "errors": [f"article body too similar to {article_name}: {score:.2f}"]}
     validation = validate_draft_article(draft, source_cache_dir=root_path / "source_cache")
     if not validation["ok"]:
         return {"ok": False, "status": "DRAFT_INVALID", "errors": validation["errors"], "draft": str(draft_path)}
