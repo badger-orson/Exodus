@@ -6,6 +6,7 @@ import argparse
 import html
 import json
 from pathlib import Path
+import random
 import re
 import sys
 
@@ -139,10 +140,11 @@ def _published_topic_ids(root: Path) -> set[str]:
     return ids
 
 
-def _select_context(root: Path) -> dict[str, Any]:
+def _select_context(root: Path, *, rng: Any | None = None, excluded_topic_ids: set[str] | None = None) -> dict[str, Any]:
     chunks_dir = root / "source_cache" / "chunks"
     selected: list[dict[str, Any]] = []
-    used_topics = _published_topic_ids(root)
+    chunks_by_book: dict[str, list[dict[str, Any]]] = {}
+    used_topics = _published_topic_ids(root) | set(excluded_topic_ids or set())
     for chunk_file in sorted(chunks_dir.glob("*.json")):
         chunks = json.loads(chunk_file.read_text(encoding="utf-8"))
         for chunk in chunks:
@@ -152,20 +154,33 @@ def _select_context(root: Path) -> dict[str, Any]:
             slug = topic_id.replace("_", "-")
             if topic_id in used_topics or _article_exists(root, slug):
                 continue
-            selected.append(
-                {
-                    "id": chunk.get("id"),
-                    "book_slug": chunk.get("book_slug"),
-                    "official_title": chunk.get("official_title"),
-                    "official_year": chunk.get("official_year"),
-                    "text_excerpt": str(chunk.get("text", ""))[:900],
-                    "text": str(chunk.get("text", "")),
-                    "word_count": chunk.get("word_count"),
-                }
-            )
-            if len(selected) >= 3:
-                return {"selected_source_chunks": selected, "draft_schema": DRAFT_SCHEMA}
-    return {"selected_source_chunks": selected, "draft_schema": DRAFT_SCHEMA}
+            item = {
+                "id": chunk.get("id"),
+                "book_slug": chunk.get("book_slug"),
+                "official_title": chunk.get("official_title"),
+                "official_year": chunk.get("official_year"),
+                "text_excerpt": str(chunk.get("text", ""))[:900],
+                "text": str(chunk.get("text", "")),
+                "word_count": chunk.get("word_count"),
+            }
+            selected.append(item)
+            chunks_by_book.setdefault(str(chunk.get("book_slug")), []).append(item)
+
+    eligible_books = sorted(book_slug for book_slug, chunks in chunks_by_book.items() if len(chunks) >= 2)
+    if not eligible_books:
+        return {"selected_source_chunks": selected[:3], "draft_schema": DRAFT_SCHEMA}
+
+    chooser = rng or random.SystemRandom()
+    book_slug = chooser.choice(eligible_books)
+    book_chunks = chunks_by_book[book_slug]
+    lead = chooser.choice(book_chunks)
+    lead_index = book_chunks.index(lead)
+    ordered = [lead]
+    for offset in range(1, len(book_chunks)):
+        ordered.append(book_chunks[(lead_index + offset) % len(book_chunks)])
+        if len(ordered) >= 3:
+            break
+    return {"selected_source_chunks": ordered, "draft_schema": DRAFT_SCHEMA}
 
 
 def _published_titles(root: Path) -> set[str]:
@@ -270,13 +285,13 @@ def _build_deterministic_draft(root: Path, selected: list[dict[str, Any]]) -> di
         }.items()
     }
     body_html = f"""
-<p>This reading narrows in on {escaped['detail_1']}, {escaped['detail_2']}, and {escaped['detail_3']}: not as lore labels, but as pressure points. They make the danger feel local. Someone is being watched. Someone is hurt. Someone has to decide quickly because the system around them has already stopped protecting ordinary people.</p>
-<p>{escaped['official_title']} places its pressure where survival fiction earns or loses trust: not in a speech, not in a clean victory, but in the moment when the people inside the system realize the system has already stopped protecting them. The official timeline puts this story in {official_year}, and the scenes point toward a world where danger is not abstract. Those concrete details are warning lights. They show a society where fear has become procedure and where every ordinary room can turn into a checkpoint.</p>
+<p>This reading starts from source chunks {escaped['source_ids']} and narrows in on {escaped['detail_1']}, {escaped['detail_2']}, and {escaped['detail_3']}: not as lore labels, but as pressure points. The selected passage opens with this kind of pressure: {escaped['source_line_1']}. That sentence-level texture is the reason this article exists. It gives the signal a different center than the last article instead of recycling the same safe overview.</p>
+<p>{escaped['official_title']} places its pressure where survival fiction earns or loses trust: not in a speech, not in a clean victory, but in the moment when the people inside the system realize the system has already stopped protecting them. The official timeline puts this story in {official_year}, and this randomly selected part points toward a world where danger is not abstract. A second source beat sharpens the angle: {escaped['source_line_2']}. Those concrete details are warning lights. They show a society where fear has become procedure and where every ordinary room can turn into a checkpoint.</p>
 <p>The strongest thing about this part of Exodus is the way competence becomes moral weight. Characters do not survive because the universe grants them mercy. They survive because someone notices the wrong face in a crowd, reads the threat before it becomes official, or improvises with whatever remains close at hand. The story keeps returning to practical action: security moving through crowds, workers disappearing below a dome, a wounded body handled with wire because proper equipment is not available. That texture matters because it makes the larger conflict feel lived in. Collapse is not just a background condition. It reaches the counter, the lift shaft, the patrol route, the body, and the next breath.</p>
 <p>That is why {escaped['official_title']} works for readers who like survival stories with teeth. The book is not asking whether people are brave in the abstract. It asks whether they can stay useful while frightened. It asks whether hatred, grief, and old injuries can become a map instead of a trap. When a character recognizes a threat through memory, pain, or pattern, the scene turns survival into attention. The person who sees clearly first has a chance. The person who waits for permission may already be lost.</p>
 <p>The story also keeps the politics grounded. The words around the action point to police power, hostage taking, lower levels, workers, security troops, and people who have learned to live underneath official comfort. That gives the Exodus universe its bite. The future is advanced enough to have domes, pads, altered bodies, and shipboard systems, but the old human questions remain. Who gets protected. Who gets used. Who gets named as a threat. Who gets treated as disposable until they become dangerous enough to notice.</p>
 <p>Readers coming from post-collapse fiction will recognize the shape, but Exodus gives it a sharper industrial edge. The danger is not only hunger or weather. It is administration with weapons behind it. It is a culture that can file suffering into categories and keep moving. The result is a setting where rebellion does not need to announce itself with a banner. Sometimes rebellion is a hidden worker network. Sometimes it is a refusal to stay captured. Sometimes it is a wounded person making one more ugly repair because no clean option remains.</p>
-<p>The best entry point into this book is the pressure itself. Watch how the story uses rooms, counters, shafts, crowds, and improvised medical choices. Watch how a personal vendetta sits beside a larger social fracture. Watch how the Ark and its divided populations turn every encounter into a test of perception. That is the reader promise here: not a shiny future, but a future where every tool, injury, and rumor carries weight.</p>
+<p>The best entry point into this book is the pressure itself. Watch how the story uses rooms, counters, shafts, crowds, and improvised choices. In this selected passage, the third source beat is the tell: {escaped['source_line_3']}. Watch how a personal vendetta sits beside a larger social fracture. Watch how the Ark and its divided populations turn every encounter into a test of perception. That is the reader promise here: not a shiny future, but a future where every tool, injury, and rumor carries weight.</p>
 <p>The smaller details are doing the heavy lifting. {escaped['detail_1']} gives the conflict a human face. {escaped['detail_2']} ties the danger back to consequence and memory. {escaped['detail_3']} shows how quickly private fear can become organized force. None of those pieces need a lore lecture to matter. They matter because they sit inside action. A reader can feel the machinery of power working around the characters, and can also see where that machinery leaves gaps for desperate people to move through.</p>
 <p>{escaped['official_title']} is worth reading because it treats survival as discipline rather than luck. It understands that systems fail in layers. First trust fails. Then procedure fails. Then language fails, because official labels no longer describe what people are living through. By the time violence becomes visible, the real break has already happened. The useful characters are the ones who felt the break early and adapted before the announcement arrived.</p>
 <p>That makes the book useful as more than a plot machine. It becomes a study of pressure. The clean institutions are gone or compromised, but people still need water, shelter, safety, witnesses, exits, and someone willing to make an ugly repair before the next attack. Exodus keeps returning to that truth. Civilization is not proven by slogans. It is proven by whether anyone can keep another person alive when the lights flicker, the records lie, and the corridor ahead is no longer safe.</p>
@@ -299,7 +314,7 @@ def _build_deterministic_draft(root: Path, selected: list[dict[str, Any]]) -> di
     }
 
 
-def run_editorial_cycle(*, root: str | Path = ".", allow_extract: bool = True) -> dict[str, Any]:
+def run_editorial_cycle(*, root: str | Path = ".", allow_extract: bool = True, rng: Any | None = None, max_attempts: int = 20) -> dict[str, Any]:
     root_path = Path(root)
     ready = sorted((root_path / "drafts" / "ready").glob("*.json")) if (root_path / "drafts" / "ready").exists() else []
     if ready:
@@ -316,27 +331,45 @@ def run_editorial_cycle(*, root: str | Path = ".", allow_extract: bool = True) -
     elif not (root_path / "source_cache" / "books.json").exists():
         return {"ok": False, "status": "SOURCE_CACHE_INVALID", "errors": ["missing exodus_metadata.json and source_cache/books.json"]}
 
-    context = _select_context(root_path)
-    try:
-        draft = _build_deterministic_draft(root_path, context["selected_source_chunks"])
-    except ValueError as exc:
-        return {"ok": False, "status": "NEEDS_SOURCE_CHUNKS", "errors": [str(exc)], **context}
-
-    validation = validate_draft_article(draft, source_cache_dir=root_path / "source_cache")
-    if not validation["ok"]:
-        printable = {key: value for key, value in validation.items() if key != "visible_text"}
-        return {"ok": False, "status": "GENERATED_DRAFT_INVALID", "errors": validation["errors"], "validation": printable, "draft": draft, **context}
-
     ready_dir = root_path / "drafts" / "ready"
     ready_dir.mkdir(parents=True, exist_ok=True)
-    draft_path = ready_dir / f"{draft['slug']}.json"
-    draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    published = publish_one_ready_draft(root=root_path)
-    if published.get("ok"):
-        published["draft_generated"] = True
-        published["source_chunks"] = draft["source_chunks"]
-        published["thesis"] = draft["thesis"]
-    return published
+    rejected_topic_ids: set[str] = set()
+    last_context: dict[str, Any] = {"selected_source_chunks": [], "draft_schema": DRAFT_SCHEMA}
+    last_result: dict[str, Any] | None = None
+    for _attempt in range(max_attempts):
+        context = _select_context(root_path, rng=rng, excluded_topic_ids=rejected_topic_ids)
+        last_context = context
+        try:
+            draft = _build_deterministic_draft(root_path, context["selected_source_chunks"])
+        except ValueError as exc:
+            return {"ok": False, "status": "NEEDS_SOURCE_CHUNKS", "errors": [str(exc)], **context}
+
+        validation = validate_draft_article(draft, source_cache_dir=root_path / "source_cache")
+        if not validation["ok"]:
+            printable = {key: value for key, value in validation.items() if key != "visible_text"}
+            return {"ok": False, "status": "GENERATED_DRAFT_INVALID", "errors": validation["errors"], "validation": printable, "draft": draft, **context}
+
+        draft_path = ready_dir / f"{draft['slug']}.json"
+        draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        published = publish_one_ready_draft(root=root_path)
+        if published.get("ok"):
+            published["draft_generated"] = True
+            published["source_chunks"] = draft["source_chunks"]
+            published["thesis"] = draft["thesis"]
+            return published
+        last_result = published
+        if published.get("status") not in {"DUPLICATE_TITLE", "DUPLICATE_BODY", "NEAR_DUPLICATE_BODY"}:
+            return published
+        rejected_topic_ids.add(str(draft["topic_id"]))
+        try:
+            draft_path.unlink()
+        except FileNotFoundError:
+            pass
+
+    errors = ["could not generate a unique publishable article"]
+    if last_result and last_result.get("errors"):
+        errors.extend(str(error) for error in last_result["errors"])
+    return {"ok": False, "status": "UNIQUE_DRAFT_EXHAUSTED", "errors": errors, **last_context}
 
 
 def main(argv: Iterable[str] | None = None) -> int:
