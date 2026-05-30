@@ -1,225 +1,45 @@
-#!/usr/bin/env python3
-"""Exodus Signal Archive static renderer.
-
-Homepage renderer for the autonomous Exodus book-promotion blog. Article bodies
-come from drafts and existing HTML; this file owns the shared visual system and
-homepage shell.
-"""
-
-from __future__ import annotations
-
-import html
-import json
-import os
-import re
-from datetime import datetime
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent
-
-BOOKS = {
-    "chaos-rising": {
-        "title": "Chaos Rising",
-        "year": "2082",
-        "label": "Curfew State",
-        "accent": "#BDBDFF",
-        "dark": "#18104A",
-        "mid": "#2A206C",
-        "anchor": "https://exodus.orsontbadger.com/#book-1",
-        "blurb": "Curfew, compliance, forbidden learning, and the Freemen ark.",
-    },
-    "mutiny": {
-        "title": "Mutiny",
-        "year": "2102",
-        "label": "Ark Fracture",
-        "accent": "#CCB3FF",
-        "dark": "#261048",
-        "mid": "#3C1E68",
-        "anchor": "https://exodus.orsontbadger.com/#book-2",
-        "blurb": "A generation ship survives launch. Trust does not.",
-    },
-    "moonbound": {
-        "title": "MoonBound",
-        "year": "2087",
-        "label": "Lunar Prison",
-        "accent": "#EAB6FB",
-        "dark": "#34103C",
-        "mid": "#4E1C5A",
-        "anchor": "https://exodus.orsontbadger.com/#book-3",
-        "blurb": "Lunar prisons, buried resistance, and escape where roads do not exist.",
-    },
-    "biorift": {
-        "title": "BioRift",
-        "year": "2898",
-        "label": "Altair Rift",
-        "accent": "#F8BAD8",
-        "dark": "#38102A",
-        "mid": "#5A1C40",
-        "anchor": "https://exodus.orsontbadger.com/#book-4",
-        "blurb": "The far future learns new tools for old monsters.",
-    },
-    "sandrats": {
-        "title": "SandRats",
-        "year": "2898",
-        "label": "Azaa Frontier",
-        "accent": "#FFC0C8",
-        "dark": "#3E1018",
-        "mid": "#621E28",
-        "anchor": "https://exodus.orsontbadger.com/#book-5",
-        "blurb": "The promised world has teeth, dust, water laws, and no mercy.",
-    },
-}
-
-STYLE = r"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A provocative look at BioRift, survival pressure, and the ugly choices that make the Exodus timeline hard to forget.">
+  <title>The Future Learned to File Fear as Procedure · Exodus Signal Archive</title>
+  <style>
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
 :root{--color-bg:#000;--surface:#080711;--surface-2:#111022;--glass:rgba(18,15,35,.72);--line:rgba(184,176,208,.16);--line-strong:rgba(232,224,240,.28);--text:#e8e0f0;--text-warm:#ede9e3;--muted:#9a8fb0;--accent:#b8b0d0;--hero:#e0e2f4;--hero-muted:#9496ac;--chaos:#BDBDFF;--mutiny:#CCB3FF;--moonbound:#EAB6FB;--biorift:#F8BAD8;--sandrats:#FFC0C8;--book-accent:var(--chaos);--book-dark:#18104A;--book-mid:#2A206C;--font-display:'Exo 2','Futura','Century Gothic',Arial,sans-serif;--font-body:'Rajdhani','Gill Sans','Optima',Arial,sans-serif;--font-mono:'Share Tech Mono','Courier New',monospace;--pad:clamp(1rem,3vw,2rem);--max:74rem;--read:46rem;--radius:22px;--shadow:0 24px 90px rgba(0,0,0,.45)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:#000;color:var(--text);font-family:var(--font-body);font-size:clamp(1rem,1.2vw,1.125rem);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}body:before{content:'';position:fixed;inset:0;z-index:-3;pointer-events:none;background:radial-gradient(ellipse at 16% 10%,rgba(66,56,166,.42),transparent 38%),radial-gradient(ellipse at 76% 22%,rgba(108,46,124,.25),transparent 34%),radial-gradient(ellipse at 50% 100%,rgba(138,48,56,.22),transparent 44%),linear-gradient(180deg,#000 0%,#070611 28%,#120d2d 58%,#050102 100%)}body:after{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.23;background-image:linear-gradient(rgba(184,176,208,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(184,176,208,.05) 1px,transparent 1px),url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");background-size:72px 72px,72px 72px,512px 512px}a{color:inherit;text-decoration:none}a:focus-visible{outline:2px solid var(--book-accent);outline-offset:4px;border-radius:8px}.site{position:relative;z-index:1}.site:before{content:'EXODUS';position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:-1;font-family:var(--font-display);font-size:clamp(6rem,22vw,18rem);font-weight:900;letter-spacing:.08em;color:rgba(232,224,240,.035);white-space:nowrap;pointer-events:none}.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:var(--max);margin:0 auto;padding:.85rem var(--pad);font-family:var(--font-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);backdrop-filter:blur(12px)}.brand{display:flex;align-items:center;gap:.55rem;color:var(--text);font-weight:700}.brand:before{content:'';width:.72rem;height:.72rem;border:1px solid var(--accent);border-radius:50%;box-shadow:0 0 24px rgba(184,176,208,.5)}.nav-links{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}.pill,.cta,.read-more{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border:1px solid rgba(184,176,208,.28);border-radius:999px;background:rgba(8,7,17,.72);color:var(--text);padding:.55rem .9rem;font-family:var(--font-display);font-size:.76rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;transition:transform .25s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease}.pill:hover,.cta:hover,.read-more:hover{transform:translateY(-1px);border-color:var(--book-accent);box-shadow:0 0 32px color-mix(in srgb,var(--book-accent) 28%,transparent)}.hero{max-width:var(--max);margin:0 auto;padding:clamp(4.5rem,9vw,8rem) var(--pad) clamp(2.5rem,5vw,4rem);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(18rem,.85fr);gap:clamp(2rem,6vw,5rem);align-items:end}.eyebrow,.article-kicker,.post-meta,.timeline-year,.section-note{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--book-accent)}.hero h1{margin:.7rem 0 1rem;font-family:var(--font-display);font-weight:900;line-height:.9;font-size:clamp(3.3rem,10vw,8rem);letter-spacing:.035em;text-transform:uppercase;color:var(--hero);text-shadow:0 0 50px rgba(189,189,255,.22)}.gradient{display:block;background:linear-gradient(100deg,var(--chaos),var(--moonbound),var(--sandrats));-webkit-background-clip:text;background-clip:text;color:transparent}.lede{max-width:46rem;margin:0 0 1.5rem;color:#c8c1d7;font-size:clamp(1.2rem,2vw,1.55rem);line-height:1.45}.hero-actions{display:flex;gap:.8rem;flex-wrap:wrap}.cta{background:linear-gradient(135deg,rgba(189,189,255,.2),rgba(248,186,216,.12));border-color:rgba(232,224,240,.38)}.timeline-card{position:relative;padding:1.2rem;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(24,16,74,.52),rgba(8,7,17,.74));box-shadow:var(--shadow);overflow:hidden}.timeline-card:before{content:'';position:absolute;inset:-40% -20% auto auto;width:16rem;height:16rem;border:1px solid rgba(184,176,208,.16);border-radius:50%;box-shadow:0 0 0 34px rgba(184,176,208,.045),0 0 0 68px rgba(184,176,208,.025)}.timeline-item{position:relative;display:grid;grid-template-columns:4rem 1fr;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line)}.timeline-item:last-child{border-bottom:0}.timeline-year{color:var(--item-accent,var(--accent))}.timeline-title{font-family:var(--font-display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text)}.timeline-label{color:var(--muted);font-size:.95rem}.section{max-width:var(--max);margin:0 auto;padding:clamp(2.5rem,6vw,5rem) var(--pad)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}.section h2{margin:0;font-family:var(--font-display);font-size:clamp(1.6rem,4vw,3rem);line-height:1;text-transform:uppercase;letter-spacing:.08em;color:var(--hero)}.feature-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(16rem,.9fr);gap:1rem;margin-bottom:1rem}.featured-card,.book-card,.post-card,.sales-card{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(18,15,35,.78),rgba(8,7,17,.9));box-shadow:var(--shadow);overflow:hidden}.featured-card{min-height:24rem;padding:clamp(1.25rem,3vw,2rem);display:flex;flex-direction:column;justify-content:flex-end;background:radial-gradient(circle at 20% 0,color-mix(in srgb,var(--book-accent) 22%,transparent),transparent 38%),linear-gradient(160deg,color-mix(in srgb,var(--book-dark) 82%,#000),#05040b 72%)}.featured-card:before,.post-card:before,.article-wrap:before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--book-accent),transparent)}.featured-card h2{font-size:clamp(2rem,5vw,4.2rem);letter-spacing:.03em;line-height:.96;margin:.6rem 0 1rem}.featured-card p{max-width:42rem;color:#d1cadd;font-size:1.16rem}.book-stack{display:grid;gap:1rem}.book-card{padding:1rem}.book-card h3{margin:.25rem 0;font-family:var(--font-display);letter-spacing:.09em;text-transform:uppercase;color:var(--item-accent,var(--text))}.book-card p{margin:0;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.post-card{--book-accent:var(--card-accent,var(--accent));--book-dark:var(--card-dark,#18104A);display:flex;min-height:18rem;flex-direction:column;justify-content:space-between;padding:1.1rem;background:radial-gradient(circle at 24% 0,color-mix(in srgb,var(--book-accent) 18%,transparent),transparent 38%),linear-gradient(180deg,rgba(18,15,35,.82),rgba(5,4,11,.94))}.post-card h3{margin:.55rem 0 .7rem;font-family:var(--font-display);font-size:clamp(1.35rem,2.4vw,2rem);line-height:1.05;letter-spacing:.035em;text-transform:uppercase;color:var(--text)}.post-card p{margin:0;color:#bdb5ce}.post-card .read-more{align-self:flex-start;margin-top:1.2rem}.archive-empty{padding:2rem;border:1px solid var(--line);border-radius:var(--radius);color:var(--muted)}.article-page{--book-accent:var(--article-accent,var(--chaos));--book-dark:var(--article-dark,#18104A);padding-bottom:5.8rem}.article-wrap{position:relative;max-width:var(--read);margin:0 auto;padding:clamp(3rem,7vw,6rem) var(--pad);border-left:1px solid rgba(184,176,208,.08);border-right:1px solid rgba(184,176,208,.08);background:linear-gradient(180deg,rgba(8,7,17,.55),rgba(0,0,0,.08))}.article-wrap h1{margin:.75rem 0 1rem;font-family:var(--font-display);font-size:clamp(2.35rem,6vw,4.9rem);font-weight:900;line-height:1;letter-spacing:.025em;text-transform:uppercase;color:var(--hero)}.article-dek{margin:0 0 2rem;color:#c9c1d7;font-size:clamp(1.15rem,2vw,1.45rem);line-height:1.45}.article-body{font-size:1.16rem}.article-body p{margin:0 0 1.35rem}.article-body a{color:var(--book-accent);border-bottom:1px solid color-mix(in srgb,var(--book-accent) 50%,transparent)}.article-body h2{margin:2.4rem 0 1rem;font-family:var(--font-display);font-size:1.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--book-accent)}.sales-card{margin:3rem 0 0;padding:1.35rem;background:linear-gradient(145deg,color-mix(in srgb,var(--book-dark) 68%,#000),rgba(8,7,17,.92));border-color:color-mix(in srgb,var(--book-accent) 42%,transparent)}.sales-card h2{margin:0 0 .65rem;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.08em}.sales-card p{margin:0 0 1rem;color:#cdc5d8}.sticky-cta{position:fixed;left:50%;bottom:.8rem;z-index:30;transform:translateX(-50%);width:min(calc(100% - 1rem),46rem);display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.65rem .75rem;border:1px solid color-mix(in srgb,var(--book-accent) 42%,transparent);border-radius:999px;background:rgba(5,4,11,.88);box-shadow:0 18px 70px rgba(0,0,0,.45);backdrop-filter:blur(14px);font-family:var(--font-mono);font-size:.78rem;color:var(--muted)}.sticky-cta strong{font-family:var(--font-display);color:var(--text);letter-spacing:.14em}.sticky-cta a{padding:.45rem .7rem;border-radius:999px;background:var(--book-accent);color:#090711;font-family:var(--font-display);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.footer{max-width:var(--max);margin:0 auto;padding:3rem var(--pad);color:var(--muted);font-family:var(--font-mono);font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;border-top:1px solid var(--line)}
 [data-book='chaos-rising']{--card-accent:#BDBDFF;--card-dark:#18104A;--article-accent:#BDBDFF;--article-dark:#18104A}[data-book='mutiny']{--card-accent:#CCB3FF;--card-dark:#261048;--article-accent:#CCB3FF;--article-dark:#261048}[data-book='moonbound']{--card-accent:#EAB6FB;--card-dark:#34103C;--article-accent:#EAB6FB;--article-dark:#34103C}[data-book='biorift']{--card-accent:#F8BAD8;--card-dark:#38102A;--article-accent:#F8BAD8;--article-dark:#38102A}[data-book='sandrats']{--card-accent:#FFC0C8;--card-dark:#3E1018;--article-accent:#FFC0C8;--article-dark:#3E1018}
 @media(max-width:920px){.hero,.feature-grid{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline-card{max-width:36rem}}@media(max-width:640px){.nav{position:relative;align-items:flex-start;flex-direction:column}.hero{padding-top:3rem}.grid{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.featured-card{min-height:20rem}.sticky-cta{border-radius:18px;align-items:flex-start;flex-direction:column}.sticky-cta a{width:100%}}
-"""
-
-
-def _strip_tags(value: str) -> str:
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(value))).strip()
-
-
-def _read_meta(slug: str) -> dict:
-    path = ROOT / "article_meta" / f"{slug}.json"
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return {}
-
-
-def _extract_article(path: Path) -> dict:
-    slug = path.stem
-    text = path.read_text(encoding="utf-8", errors="ignore")
-    meta = _read_meta(slug)
-    title_match = re.search(r"<h1[^>]*>(.*?)</h1>", text, re.S | re.I)
-    desc_match = re.search(r'<meta name="description" content="([^"]*)"', text, re.S | re.I)
-    title = _strip_tags(title_match.group(1)) if title_match else slug.replace("-", " ").title()
-    excerpt = html.unescape(desc_match.group(1)).strip() if desc_match else "A sharp path into the Exodus series."
-    book_slug = str(meta.get("book_slug") or _infer_book_slug(slug, text))
-    book = BOOKS.get(book_slug, {})
-    published = str(meta.get("published_at", ""))
-    timestamp = path.stat().st_mtime
-    if published:
-        try:
-            timestamp = datetime.fromisoformat(published.replace("Z", "+00:00")).timestamp()
-        except ValueError:
-            pass
-    return {
-        "slug": slug,
-        "title": title,
-        "excerpt": excerpt,
-        "book_slug": book_slug,
-        "book_title": str(meta.get("official_title") or book.get("title") or "Exodus"),
-        "year": str(meta.get("official_year") or book.get("year") or ""),
-        "label": str(book.get("label") or "Signal"),
-        "anchor": str(book.get("anchor") or "https://exodus.orsontbadger.com"),
-        "timestamp": timestamp,
-    }
-
-
-def _infer_book_slug(slug: str, text: str) -> str:
-    haystack = f"{slug} {text[:2000]}".lower()
-    for book_slug, book in BOOKS.items():
-        if book_slug in haystack or str(book["title"]).lower() in haystack:
-            return book_slug
-    return "chaos-rising"
-
-
-def discover_existing_articles() -> list[dict]:
-    articles_dir = ROOT / "articles"
-    if not articles_dir.is_dir():
-        return []
-    articles = [_extract_article(path) for path in articles_dir.glob("*.html")]
-    return sorted(articles, key=lambda item: (item["timestamp"], item["slug"]), reverse=True)
-
-
-def _timeline_html() -> str:
-    rows = []
-    for slug, book in BOOKS.items():
-        rows.append(
-            f"<a class='timeline-item' href='{html.escape(book['anchor'], quote=True)}' style='--item-accent:{book['accent']}'><div class='timeline-year'>{book['year']}</div><div><div class='timeline-title'>{html.escape(book['title'])}</div><div class='timeline-label'>{html.escape(book['label'])}</div></div></a>"
-        )
-    return "".join(rows)
-
-
-def _book_cards_html() -> str:
-    cards = []
-    for slug, book in BOOKS.items():
-        cards.append(
-            f"<article class='book-card' data-book='{slug}' style='--item-accent:{book['accent']}'><div class='post-meta'>{book['year']} · {html.escape(book['label'])}</div><h3>{html.escape(book['title'])}</h3><p>{html.escape(book['blurb'])}</p></article>"
-        )
-    return "".join(cards)
-
-
-def _article_card(article: dict, essay_number: int) -> str:
-    return (
-        f"<article class='post-card' data-book='{html.escape(article['book_slug'], quote=True)}'>"
-        f"<div><div class='post-meta'>Signal {essay_number:03d} · {html.escape(article['book_title'])} · {html.escape(article['year'])}</div>"
-        f"<h3>{html.escape(article['title'])}</h3><p>{html.escape(article['excerpt'])}</p></div>"
-        f"<a class='read-more' href='articles/{html.escape(article['slug'], quote=True)}.html'>Read transmission</a></article>"
-    )
-
-
-def generate_homepage() -> None:
-    articles = discover_existing_articles()
-    total = len(articles)
-    featured = articles[0] if articles else None
-    cards = "".join(_article_card(article, total - index) for index, article in enumerate(articles))
-    if not cards:
-        cards = "<div class='archive-empty'>No transmissions published yet.</div>"
-    feature_html = ""
-    if featured:
-        feature_html = (
-            f"<a class='featured-card' data-book='{html.escape(featured['book_slug'], quote=True)}' href='articles/{html.escape(featured['slug'], quote=True)}.html'>"
-            f"<div class='post-meta'>Featured Signal · {html.escape(featured['book_title'])} · {html.escape(featured['year'])}</div>"
-            f"<h2>{html.escape(featured['title'])}</h2><p>{html.escape(featured['excerpt'])}</p><span class='read-more'>Read latest</span></a>"
-        )
-    html_text = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The Exodus Signal Archive: dark reading paths through Orson T. Badger's five-book science fiction saga.">
-  <title>Exodus Signal Archive · Orson T. Badger</title>
-  <style>{STYLE}</style>
+</style>
 </head>
-<body>
+<body class="article-page" data-book="biorift">
   <div class="site">
-    <nav class="nav"><a class="brand" href="./">EXODUS SIGNAL ARCHIVE</a><div class="nav-links"><a class="pill" href="#transmissions">Transmissions</a><a class="pill" href="https://exodus.orsontbadger.com">Official series</a></div></nav>
-    <header class="hero">
-      <div>
-        <div class="eyebrow">Orson T. Badger · Transmission archive</div>
-        <h1>EXODUS <span class="gradient">SIGNALS</span></h1>
-        <p class="lede">Sharp reading paths through curfew states, ark mutiny, lunar prisons, broken futures, and desert survival after the promised world fails.</p>
-        <div class="hero-actions"><a class="cta" href="https://exodus.orsontbadger.com/#book-1">Start the Saga</a><a class="pill" href="#timeline">Explore Timeline</a></div>
+    <nav class="nav"><a class="brand" href="../">EXODUS SIGNAL ARCHIVE</a><div class="nav-links"><a class="pill" href="../#transmissions">Transmissions</a><a class="pill" href="https://exodus.orsontbadger.com">Official series</a></div></nav>
+    <main class="article-wrap">
+      <div class="article-kicker">BioRift · 2898 · biorift-biorift-0028-article · May 29, 2026</div>
+      <h1>The Future Learned to File Fear as Procedure</h1>
+      <p class="article-dek">A provocative look at BioRift, survival pressure, and the ugly choices that make the Exodus timeline hard to forget.</p>
+      <div class="article-body">
+<p>Signal path biorift:0028, biorift:0029, biorift:0030 keeps this essay tied to a specific pressure band instead of recycling the same broad summary. One line of force is this: They stared back at her, some shied away, not bothering to hide the fear on their faces of the Wirespawn blonde. Another is this: After a few moments he whispered, “How’re you doing?” Portar’s eyelids fluttered and he groaned through clenched teeth, “Not good.” He swallowed, “Need to go on … without me.” Alan tipped his head back until it thumped against the door. A third is this: There are only three effective methods of killing a Bioknight: Remove its head Destroy its heart Cause it to bleed to death. Those details decide the angle of the reading, because Exodus is strongest when the evidence stays close to the room, the body, and the systems pressing on both.</p>
+<p>BioRift places its pressure where survival fiction earns or loses trust: not in a speech, not in a clean victory, but in the moment when the people inside the system realize the system has already stopped protecting them. The official timeline puts this story in 2898, and the scenes point toward a world where danger is not abstract. Earthers, Portar, and lift shaft are not decorative details. They are warning lights. They show a society where fear has become procedure and where every ordinary room can turn into a checkpoint.</p>
+<p>The strongest thing about this part of Exodus is the way competence becomes moral weight. Characters do not survive because the universe grants them mercy. They survive because someone notices the wrong face in a crowd, reads the threat before it becomes official, or improvises with whatever remains close at hand. The story keeps returning to practical action: security moving through crowds, workers disappearing below a dome, a wounded body handled with wire because proper equipment is not available. That texture matters because it makes the larger conflict feel lived in. Collapse is not just a background condition. It reaches the counter, the lift shaft, the patrol route, the body, and the next breath.</p>
+<p>That is why BioRift works for readers who like survival stories with teeth. The book is not asking whether people are brave in the abstract. It asks whether they can stay useful while frightened. It asks whether hatred, grief, and old injuries can become a map instead of a trap. When a character recognizes a threat through memory, pain, or pattern, the scene turns survival into attention. The person who sees clearly first has a chance. The person who waits for permission may already be lost.</p>
+<p>The story also keeps the politics grounded. The words around the action point to police power, hostage taking, lower levels, workers, security troops, and people who have learned to live underneath official comfort. That gives the Exodus universe its bite. The future is advanced enough to have domes, pads, altered bodies, and shipboard systems, but the old human questions remain. Who gets protected. Who gets used. Who gets named as a threat. Who gets treated as disposable until they become dangerous enough to notice.</p>
+<p>Readers coming from post-collapse fiction will recognize the shape, but Exodus gives it a sharper industrial edge. The danger is not only hunger or weather. It is administration with weapons behind it. It is a culture that can file suffering into categories and keep moving. The result is a setting where rebellion does not need to announce itself with a banner. Sometimes rebellion is a hidden worker network. Sometimes it is a refusal to stay captured. Sometimes it is a wounded person making one more ugly repair because no clean option remains.</p>
+<p>The best entry point into this book is the pressure itself. Watch how the story uses rooms, counters, shafts, crowds, and improvised medical choices. Watch how a personal vendetta sits beside a larger social fracture. Watch how the Ark and its divided populations turn every encounter into a test of perception. That is the reader promise here: not a shiny future, but a future where every tool, injury, and rumor carries weight.</p>
+<p>The smaller details are doing the heavy lifting. Earthers gives the conflict a human face. Portar ties the danger back to consequence and memory. lift shaft shows how quickly private fear can become organized force. None of those pieces need a lore lecture to matter. They matter because they sit inside action. A reader can feel the machinery of power working around the characters, and can also see where that machinery leaves gaps for desperate people to move through.</p>
+<p>BioRift is worth reading because it treats survival as discipline rather than luck. It understands that systems fail in layers. First trust fails. Then procedure fails. Then language fails, because official labels no longer describe what people are living through. By the time violence becomes visible, the real break has already happened. The useful characters are the ones who felt the break early and adapted before the announcement arrived.</p>
+<p>That makes the book useful as more than a plot machine. It becomes a study of pressure. The clean institutions are gone or compromised, but people still need water, shelter, safety, witnesses, exits, and someone willing to make an ugly repair before the next attack. Exodus keeps returning to that truth. Civilization is not proven by slogans. It is proven by whether anyone can keep another person alive when the lights flicker, the records lie, and the corridor ahead is no longer safe.</p>
+<p>If that is the kind of science fiction you want, start from the official Exodus page and follow the series in order. The books are built around collapse, resistance, ugly competence, and the cost of staying alive when the future has stopped pretending to be clean. Read BioRift here: <a href="https://exodus.orsontbadger.com/#book-4">https://exodus.orsontbadger.com/#book-4</a>.</p>
       </div>
-      <aside class="timeline-card" id="timeline" aria-label="Exodus timeline">{_timeline_html()}</aside>
-    </header>
-    <main>
-      <section class="section" aria-labelledby="featured-heading">
-        <div class="section-head"><h2 id="featured-heading">Latest Signal</h2><div class="section-note">Recovered reading path</div></div>
-        <div class="feature-grid">{feature_html}<div class="book-stack">{_book_cards_html()}</div></div>
-      </section>
-      <section class="section" id="transmissions" aria-labelledby="archive-heading">
-        <div class="section-head"><h2 id="archive-heading">Transmission Archive</h2><div class="section-note">{total} published signals</div></div>
-        <div class="grid">{cards}</div>
+      <section class="sales-card">
+        <h2>Read the book behind this signal</h2>
+        <p>Continue from the official Exodus page and follow the collapse, mutiny, lunar resistance, Altair-era survival, and Azaa frontier arcs in order.</p>
+        <a class="cta" href="https://exodus.orsontbadger.com/#book-4">Read BioRift</a>
       </section>
     </main>
-    <footer class="footer">Dark essays and reading paths for the Exodus series · <a href="https://exodus.orsontbadger.com">exodus.orsontbadger.com</a></footer>
+    <div class="sticky-cta"><strong>EXODUS</strong><span>The signal is only the door.</span><a href="https://exodus.orsontbadger.com/#book-4">Open the book</a></div>
   </div>
 </body>
 </html>
-"""
-    (ROOT / "index.html").write_text(html_text, encoding="utf-8")
-
-
-if __name__ == "__main__":
-    (ROOT / "articles").mkdir(exist_ok=True)
-    generate_homepage()
-    print(f"Generated Signal Archive homepage with {len(discover_existing_articles())} transmissions")

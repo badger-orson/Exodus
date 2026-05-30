@@ -22,7 +22,9 @@ def render_article_html(draft: dict[str, Any]) -> str:
     description = html.escape(str(draft.get("description", "")), quote=True)
     official_title = html.escape(str(draft.get("official_title", "")))
     official_year = html.escape(str(draft.get("official_year", "")))
+    book_slug = html.escape(str(draft.get("book_slug", "chaos-rising")), quote=True)
     site_anchor = html.escape(str(draft.get("site_anchor", "https://exodus.orsontbadger.com")), quote=True)
+    topic_id = html.escape(str(draft.get("topic_id", "signal")))
     body_html = str(draft["body_html"])
     today = date.today().strftime("%B %d, %Y")
     return f"""<!DOCTYPE html>
@@ -31,26 +33,26 @@ def render_article_html(draft: dict[str, Any]) -> str:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{description}">
-  <title>{title} · Exodus Stories</title>
+  <title>{title} · Exodus Signal Archive</title>
   <style>{generate.STYLE}</style>
 </head>
-<body class="article-page">
+<body class="article-page" data-book="{book_slug}">
   <div class="site">
-    <nav class="nav"><a class="brand" href="../">EXODUS STORIES</a><a class="pill" href="https://exodus.orsontbadger.com">Read the series</a></nav>
+    <nav class="nav"><a class="brand" href="../">EXODUS SIGNAL ARCHIVE</a><div class="nav-links"><a class="pill" href="../#transmissions">Transmissions</a><a class="pill" href="https://exodus.orsontbadger.com">Official series</a></div></nav>
     <main class="article-wrap">
-      <div class="article-kicker">{official_title} · {official_year} · Exodus Books · {today}</div>
+      <div class="article-kicker">{official_title} · {official_year} · {topic_id} · {today}</div>
       <h1>{title}</h1>
       <p class="article-dek">{description}</p>
       <div class="article-body">
 {body_html}
       </div>
       <section class="sales-card">
-        <h2>Read the book behind this story</h2>
-        <p>Start the Exodus series from the official book page and follow the collapse, mutiny, lunar resistance, and Altair-era survival arcs in order.</p>
+        <h2>Read the book behind this signal</h2>
+        <p>Continue from the official Exodus page and follow the collapse, mutiny, lunar resistance, Altair-era survival, and Azaa frontier arcs in order.</p>
         <a class="cta" href="{site_anchor}">Read {official_title}</a>
       </section>
     </main>
-    <div class="sticky-cta"><strong>EXODUS</strong><span>The article is only the door.</span><a href="{site_anchor}">Open the book</a></div>
+    <div class="sticky-cta"><strong>EXODUS</strong><span>The signal is only the door.</span><a href="{site_anchor}">Open the book</a></div>
   </div>
 </body>
 </html>
