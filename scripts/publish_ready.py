@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -109,6 +110,21 @@ def _strip_tags(value: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", value)).strip()
 
 
+def _normalize_visible_text(value: str) -> str:
+    visible = _strip_tags(value).lower()
+    return re.sub(r"[^a-z0-9]+", " ", visible).strip()
+
+
+def _article_body_html(article_html: str) -> str:
+    match = re.search(r'<div class="article-body">(.*?)<section class="sales-card">', article_html, re.S | re.I)
+    return match.group(1) if match else article_html
+
+
+def _body_fingerprint(value: str) -> str:
+    normalized = _normalize_visible_text(value)
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 def existing_article_titles(root: str | Path = ".") -> dict[str, list[str]]:
     root_path = Path(root)
     titles: dict[str, list[str]] = {}
@@ -118,6 +134,16 @@ def existing_article_titles(root: str | Path = ".") -> dict[str, list[str]]:
         title = _strip_tags(match.group(1)) if match else article.stem.replace("-", " ").title()
         titles.setdefault(title, []).append(article.name)
     return titles
+
+
+def existing_article_body_fingerprints(root: str | Path = ".") -> dict[str, list[str]]:
+    root_path = Path(root)
+    fingerprints: dict[str, list[str]] = {}
+    for article in (root_path / "articles").glob("*.html"):
+        text = article.read_text(encoding="utf-8", errors="ignore")
+        fingerprint = _body_fingerprint(_article_body_html(text))
+        fingerprints.setdefault(fingerprint, []).append(article.name)
+    return fingerprints
 
 def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, Any]:
     root_path = Path(root)
@@ -149,6 +175,9 @@ def validate_homepage_links_and_order(*, root: str | Path = ".") -> dict[str, An
     duplicate_titles = {title: files for title, files in existing_article_titles(root_path).items() if len(files) > 1}
     for title, files in sorted(duplicate_titles.items()):
         errors.append(f"duplicate article title {title}: {', '.join(sorted(files))}")
+    duplicate_bodies = {fingerprint: files for fingerprint, files in existing_article_body_fingerprints(root_path).items() if len(files) > 1}
+    for fingerprint, files in sorted(duplicate_bodies.items()):
+        errors.append(f"duplicate article body {fingerprint[:12]}: {', '.join(sorted(files))}")
     return {"ok": not errors, "errors": errors, "article_count": len(article_files), "linked_count": len(linked)}
 
 
@@ -165,6 +194,10 @@ def publish_one_ready_draft(*, root: str | Path = ".") -> dict[str, Any]:
     draft_filename = f"{draft.get('slug')}.html"
     if draft_title in existing_titles and draft_filename not in existing_titles[draft_title]:
         return {"ok": False, "status": "DUPLICATE_TITLE", "errors": [f"title already published: {draft_title}"]}
+    existing_bodies = existing_article_body_fingerprints(root_path)
+    draft_body_fingerprint = _body_fingerprint(str(draft.get("body_html", "")))
+    if draft_body_fingerprint in existing_bodies and draft_filename not in existing_bodies[draft_body_fingerprint]:
+        return {"ok": False, "status": "DUPLICATE_BODY", "errors": [f"article body already published: {', '.join(sorted(existing_bodies[draft_body_fingerprint]))}"]}
     validation = validate_draft_article(draft, source_cache_dir=root_path / "source_cache")
     if not validation["ok"]:
         return {"ok": False, "status": "DRAFT_INVALID", "errors": validation["errors"], "draft": str(draft_path)}
