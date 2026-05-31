@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.exodus_common import visible_word_count
 from scripts.publish_ready import publish_one_ready_draft, validate_homepage_links_and_order, near_duplicate_article_bodies
 
 
@@ -44,6 +45,10 @@ class PublishReadyTests(unittest.TestCase):
             self.assertEqual(result["slug"], "chaos-rising-discipline")
             self.assertTrue((root / "articles" / "chaos-rising-discipline.html").exists())
             self.assertTrue((root / "article_meta" / "chaos-rising-discipline.json").exists())
+            article_html = (root / "articles" / "chaos-rising-discipline.html").read_text(encoding="utf-8")
+            receipt = json.loads((root / "article_meta" / "chaos-rising-discipline.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["visible_word_count"], visible_word_count(article_html))
+            self.assertEqual(result["visible_word_count"], visible_word_count(article_html))
             self.assertFalse((ready / "001.json").exists())
             self.assertIn("chaos-rising-discipline.html", (root / "index.html").read_text(encoding="utf-8"))
             self.assertTrue(validate_homepage_links_and_order(root=root)["ok"])

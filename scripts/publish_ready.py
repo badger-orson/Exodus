@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from typing import Any, Iterable
 
+from scripts.exodus_common import visible_word_count
 from scripts.render_article import render_article_file
 from scripts.validate_article import validate_draft_article
 from scripts.validate_topic import mark_topic_used
@@ -251,7 +252,8 @@ def publish_one_ready_draft(*, root: str | Path = ".") -> dict[str, Any]:
         return {"ok": False, "status": "DRAFT_INVALID", "errors": validation["errors"], "draft": str(draft_path)}
 
     article_path = render_article_file(draft, output_dir=root_path / "articles")
-    receipt = create_receipt(draft, int(validation["visible_word_count"]))
+    rendered_word_count = visible_word_count(article_path.read_text(encoding="utf-8"))
+    receipt = create_receipt(draft, rendered_word_count)
     _atomic_write_json(root_path / "article_meta" / f"{draft['slug']}.json", receipt)
     if "topic" in draft:
         mark_topic_used(draft, root_path / "topics" / "used_topics.json")
@@ -267,7 +269,7 @@ def publish_one_ready_draft(*, root: str | Path = ".") -> dict[str, Any]:
         "title": draft["title"],
         "article_path": str(article_path),
         "receipt_path": str(root_path / "article_meta" / f"{draft['slug']}.json"),
-        "visible_word_count": int(validation["visible_word_count"]),
+        "visible_word_count": rendered_word_count,
     }
 
 
